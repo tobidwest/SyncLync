@@ -366,6 +366,16 @@ app.put("/api/links/:linkId", async (req, res) => {
   res.json(link);
 });
 
+app.put("/api/links/:linkId/click", async (req, res) => {
+  const link = await Link.findById(req.params.linkId);
+  if (!link) {
+    return res.status(404).json({ error: "Link not found" });
+  }
+  link.lastAccessedAt = new Date();
+  await link.save();
+  res.json(link);
+});
+
 app.put("/api/account/email", async (req, res) => {
   const { newEmail } = req.body;
   if (!newEmail || !validator.isEmail(newEmail)) {
