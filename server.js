@@ -22,6 +22,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
     secret: SESSION_SECRET,
@@ -52,6 +53,11 @@ mongoose
 
 // TODO maybe add email verification
 app.post("/auth/register", async (req, res) => {
+  if (!req.body || !req.body.username || !req.body.password) {
+    return res
+      .status(400)
+      .json({ error: "Username and password are required" });
+  }
   const { username, password } = req.body;
 
   if (!validator.isEmail(username)) {
@@ -75,8 +81,12 @@ app.post("/auth/login", passport.authenticate("local"), (req, res) => {
 });
 
 app.post("/auth/logout", (req, res) => {
-  req.logout();
-  res.sendStatus(200);
+  req.logout(function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Logout failed" });
+    }
+    res.sendStatus(200);
+  });
 });
 
 // URL to initiate a device authorization
@@ -104,6 +114,9 @@ app.get("/device/:userCode", async (req, res) => {
 
 // URL called after user confirms the device
 app.post("/device/confirm", async (req, res) => {
+  if (!req.body || !req.body.userCode) {
+    return res.status(400).send("userCode is required");
+  }
   const { userCode } = req.body;
   if (!req.user) return res.status(401).send("Login required");
 
@@ -119,6 +132,9 @@ app.post("/device/confirm", async (req, res) => {
 
 // URL for device to poll for authentication status
 app.post("/device/poll", async (req, res, next) => {
+  if (!req.body || !req.body.device_code) {
+    return res.status(400).send("device_code is required");
+  }
   const { device_code } = req.body;
   const device = await DeviceCode.findOne({ deviceCode: device_code });
   if (!device || device.expiresAt < new Date()) {
@@ -155,18 +171,31 @@ app.get("/api/collections", async (req, res) => {
     name: col.name,
     links: col.linkIds,
     isOwner: col.owner.equals(req.user._id),
+    shareId: col.shareId,
   }));
   res.json(result);
 });
 
 app.post("/api/collections", async (req, res) => {
+  if (!req.body || !req.body.name) {
+    return res.status(400).json({ error: "Name is required" });
+  }
   const { name } = req.body;
+  const existing = await Collection.findOne({ name, owner: req.user._id });
+  if (existing) {
+    return res
+      .status(409)
+      .json({ error: "Collection with this name already exists" });
+  }
   const collection = new Collection({ name, owner: req.user._id });
   await collection.save();
   res.status(201).json(collection);
 });
 
 app.delete("/api/collections/:id", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ error: "Invalid collection id" });
+  }
   const collection = await Collection.findOne({
     _id: req.params.id,
     owner: req.user._id,
@@ -186,6 +215,11 @@ app.delete("/api/collections/:id", async (req, res) => {
 });
 
 app.put("/api/collections/:id/name", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ error: "Invalid collection id" });
+  }
+  if (!req.body || !req.body.name)
+    return res.status(400).json({ error: "Name is required" });
   const { name } = req.body;
   if (!name) return res.status(400).json({ error: "Name is required" });
   const collection = await Collection.findOneAndUpdate(
@@ -212,7 +246,7 @@ app.post("/api/collections/join/:shareId", async (req, res) => {
   if (!collection) {
     return res
       .status(404)
-      .json({ error: "Collection not found or already joined/owned" });
+      .json({ error: "Collection not found or already a member" });
   }
   res.json({
     _id: collection._id,
@@ -224,6 +258,9 @@ app.post("/api/collections/join/:shareId", async (req, res) => {
 });
 
 app.post("/api/collections/:id/leave", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ error: "Invalid collection id" });
+  }
   const collection = await Collection.findOneAndUpdate(
     { _id: req.params.id, sharedWith: req.user._id },
     { $pull: { sharedWith: req.user._id } },
@@ -239,6 +276,17 @@ app.post("/api/collections/:id/leave", async (req, res) => {
 
 // Add an existing link to another collection
 app.post("/api/collections/:collectionId/links/:linkId", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.collectionId)) {
+    return res.status(400).json({ error: "Invalid collection id" });
+  }
+  if (!mongoose.Types.ObjectId.isValid(req.params.linkId)) {
+    return res.status(400).json({ error: "Invalid link id" });
+  }
+  // Check if the link exists
+  const link = await Link.findById(req.params.linkId);
+  if (!link) {
+    return res.status(404).json({ error: "Link not found" });
+  }
   const collection = await Collection.findOneAndUpdate(
     {
       _id: req.params.collectionId,
@@ -271,13 +319,14 @@ const getFaviconUrl = (url) => {
   }
 };
 
-// TODO bei allen CREATE, PUT, DELETE Routes überorüfen, ob die zurückgeschickte Antwort einheitlich ist. Vielleicht können wir auch ganz darauf verzichten und einfach nur bestätigen?
-
 app.post("/api/collections/:collectionId/links", async (req, res) => {
-  const { url, name } = req.body;
-  if (!url || !name) {
-    return res.status(400).json({ error: "url and name are required" });
+  if (!mongoose.Types.ObjectId.isValid(req.params.collectionId)) {
+    return res.status(400).json({ error: "Invalid collection id" });
   }
+  if (!req.body || !req.body.url || !req.body.name) {
+    return res.status(400).json({ error: "URL and name are required" });
+  }
+  const { url, name } = req.body;
   const collection = await Collection.findOne({
     _id: req.params.collectionId,
     $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
@@ -285,9 +334,26 @@ app.post("/api/collections/:collectionId/links", async (req, res) => {
   if (!collection) {
     return res.status(404).json({ error: "Collection not found" });
   }
-  const iconUrl = getFaviconUrl(url);
-  const link = new Link({ url, name, icon: iconUrl });
-  await link.save();
+  // Validate URL
+  if (!validator.isURL(url, { require_protocol: true })) {
+    return res.status(400).json({ error: "Invalid URL" });
+  }
+  // Check if link already exists in this collection
+  const existingLink = await Link.findOne({ url, name });
+  if (existingLink && collection.linkIds.includes(existingLink._id)) {
+    return res
+      .status(409)
+      .json({ error: "Link already exists in this collection" });
+  }
+  // Create new link or reuse existing
+  let link;
+  if (existingLink) {
+    link = existingLink;
+  } else {
+    const iconUrl = getFaviconUrl(url);
+    link = new Link({ url, name, icon: iconUrl });
+    await link.save();
+  }
   collection.linkIds.push(link._id);
   await collection.save();
   await collection.populate("linkIds");
@@ -302,38 +368,53 @@ app.post("/api/collections/:collectionId/links", async (req, res) => {
 
 // TODO server.js ist sehr lang, es sollten einzelne Teile in eigene Dateien ausgelagert werden
 
-app.post("/api/collections/:collectionId/links/:linkId", async (req, res) => {
-  const collection = await Collection.findOneAndUpdate(
-    {
-      _id: req.params.collectionId,
-      $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
-      linkIds: { $ne: req.params.linkId },
-    },
-    { $push: { linkIds: req.params.linkId } },
-    { new: true }
-  ).populate("linkIds");
-  if (!collection) {
-    return res
-      .status(404)
-      .json({ error: "Collection not found or link already added" });
-  }
-  res.json({
-    _id: collection._id,
-    name: collection.name,
-    links: collection.linkIds,
-    isOwner: collection.owner.equals(req.user._id),
-    shareId: collection.shareId,
-  });
-});
+// TODO unclear what this route was intended for, may be deleted at some later point
+// app.post("/api/collections/:collectionId/links/:linkId", async (req, res) => {
+//   if (!mongoose.Types.ObjectId.isValid(req.params.collectionId)) {
+//     return res.status(400).json({ error: "Invalid collection id" });
+//   }
+//   const collection = await Collection.findOneAndUpdate(
+//     {
+//       _id: req.params.collectionId,
+//       $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
+//       linkIds: { $ne: req.params.linkId },
+//     },
+//     { $push: { linkIds: req.params.linkId } },
+//     { new: true }
+//   ).populate("linkIds");
+//   if (!collection) {
+//     return res
+//       .status(404)
+//       .json({ error: "Collection not found or link already added" });
+//   }
+//   res.json({
+//     _id: collection._id,
+//     name: collection.name,
+//     links: collection.linkIds,
+//     isOwner: collection.owner.equals(req.user._id),
+//     shareId: collection.shareId,
+//   });
+// });
 
 app.delete("/api/collections/:collectionId/links/:linkId", async (req, res) => {
-  const collection = await Collection.findOneAndUpdate(
-    {
-      _id: req.params.collectionId,
-      $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
-    },
-    { $pull: { linkIds: req.params.linkId } },
-    { new: true }
+  if (!mongoose.Types.ObjectId.isValid(req.params.collectionId)) {
+    return res.status(400).json({ error: "Invalid collection id" });
+  }
+  if (!mongoose.Types.ObjectId.isValid(req.params.linkId)) {
+    return res.status(400).json({ error: "Invalid link id" });
+  }
+  // Check if the link exists in the collection before removing
+  const collection = await Collection.findOne({
+    _id: req.params.collectionId,
+    $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
+    linkIds: req.params.linkId,
+  });
+  if (!collection) {
+    return res.status(404).json({ error: "Link not found in this collection" });
+  }
+  await Collection.updateOne(
+    { _id: req.params.collectionId },
+    { $pull: { linkIds: req.params.linkId } }
   );
   if (!collection) {
     return res.status(404).json({ error: "Collection not found" });
@@ -342,34 +423,59 @@ app.delete("/api/collections/:collectionId/links/:linkId", async (req, res) => {
   if (!usedElsewhere) {
     await Link.findByIdAndDelete(req.params.linkId);
   }
-  await collection.populate("linkIds");
-  res.json({
-    _id: collection._id,
-    name: collection.name,
-    links: collection.linkIds,
-    isOwner: collection.owner.equals(req.user._id),
-    shareId: collection.shareId,
-  });
+  res.sendStatus(204);
 });
 
 app.put("/api/links/:linkId", async (req, res) => {
-  const { name, url } = req.body;
-  if (!name || !url) {
-    return res.status(400).json({ error: "name and url are required" });
+  if (!mongoose.Types.ObjectId.isValid(req.params.linkId)) {
+    return res.status(400).json({ error: "Invalid link id" });
   }
-  const icon = getFaviconUrl(url);
-  const link = await Link.findByIdAndUpdate(
-    req.params.linkId,
-    { name, url, icon },
-    { new: true }
-  );
+  if (!req.body || (!req.body.name && !req.body.url)) {
+    return res
+      .status(400)
+      .json({ error: "At least one of name or url is required" });
+  }
+  const existingLink = await Link.findById(req.params.linkId);
+  if (!existingLink) {
+    return res.status(404).json({ error: "Link not found" });
+  }
+
+  // Check if user is owner or member of at least one collection containing this link
+  const hasAccess = await Collection.exists({
+    linkIds: req.params.linkId,
+    $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
+  });
+  if (!hasAccess) {
+    return res.status(403);
+  }
+
+  const update = {};
+  if (req.body.name) update.name = req.body.name;
+  if (req.body.url) {
+    update.url = req.body.url;
+    update.icon = getFaviconUrl(req.body.url);
+  }
+  const link = await Link.findByIdAndUpdate(req.params.linkId, update, {
+    new: true,
+  });
   res.json(link);
 });
 
-app.put("/api/links/:linkId/click", async (req, res) => {
+app.post("/api/links/:linkId/click", async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.linkId)) {
+    return res.status(400).json({ error: "Invalid link id" });
+  }
   const link = await Link.findById(req.params.linkId);
   if (!link) {
     return res.status(404).json({ error: "Link not found" });
+  }
+  // Check if user is owner or member of at least one collection containing this link
+  const hasAccess = await Collection.exists({
+    linkIds: req.params.linkId,
+    $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
+  });
+  if (!hasAccess) {
+    return res.status(403);
   }
   link.lastAccessedAt = new Date();
   await link.save();
@@ -377,6 +483,9 @@ app.put("/api/links/:linkId/click", async (req, res) => {
 });
 
 app.put("/api/account/email", async (req, res) => {
+  if (!req.body || !req.body.newEmail) {
+    return res.status(400).json({ error: "No new email specified" });
+  }
   const { newEmail } = req.body;
   if (!newEmail || !validator.isEmail(newEmail)) {
     return res.status(400).json({ error: "Valid email required" });
@@ -391,9 +500,14 @@ app.put("/api/account/email", async (req, res) => {
 });
 
 app.put("/api/account/password", async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-  if (!oldPassword || !newPassword) {
+  if (!req.body || !req.body.oldPassword || !req.body.newPassword) {
     return res.status(400).json({ error: "Old and new password required" });
+  }
+  const { oldPassword, newPassword } = req.body;
+  if (oldPassword === newPassword) {
+    return res
+      .status(400)
+      .json({ error: "New password must be different from old password" });
   }
   const isValid = await req.user.validatePassword(oldPassword);
   if (!isValid) {
@@ -402,6 +516,9 @@ app.put("/api/account/password", async (req, res) => {
   await req.user.setPassword(newPassword);
   await req.user.save();
   await DeviceCode.deleteMany({ userId: req.user._id });
+  req.logout(() => {
+    res.sendStatus(204);
+  });
 });
 
 app.delete("/api/account", async (req, res) => {
