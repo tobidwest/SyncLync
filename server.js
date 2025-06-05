@@ -166,13 +166,19 @@ app.get("/api/collections", async (req, res) => {
   const collections = await Collection.find({
     $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
   }).populate("linkIds");
-  const result = collections.map((col) => ({
-    _id: col._id,
-    name: col.name,
-    links: col.linkIds,
-    isOwner: col.owner.equals(req.user._id),
-    shareId: col.shareId,
-  }));
+  const result = collections.map((col) => {
+    // Sort links by counter descending
+    const sortedLinks = [...col.linkIds].sort(
+      (a, b) => (b.counter || 0) - (a.counter || 0)
+    );
+    return {
+      _id: col._id,
+      name: col.name,
+      links: sortedLinks,
+      isOwner: col.owner.equals(req.user._id),
+      shareId: col.shareId,
+    };
+  });
   res.json(result);
 });
 
@@ -478,6 +484,7 @@ app.post("/api/links/:linkId/click", async (req, res) => {
     return res.status(403);
   }
   link.lastAccessedAt = new Date();
+  link.counter = (link.counter || 0) + 1;
   await link.save();
   res.json(link);
 });

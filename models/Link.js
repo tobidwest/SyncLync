@@ -18,6 +18,10 @@ const linkSchema = new Schema(
       type: Date,
       default: () => new Date(),
     },
+    counter: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true, // adds createdAt and updatedAt, might be useful for additional features
