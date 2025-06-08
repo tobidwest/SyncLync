@@ -1,0 +1,296 @@
+<!-- TODO: Test TV remote navigation, probably hover/onmouseover needs to be
+changed to active or something similar -->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <title>SyncLync</title>
+    <style type="text/css">
+      body {
+        background-color: #0d1b2a;
+        font-family: Open Sans, sans-serif;
+        color: white;
+        margin: 80px;
+        padding: 0;
+      }
+
+      #container {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      #sidebar {
+        float: left;
+        width: 20%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      #sidebar a {
+        border-left: 5px solid #0d1b2a;
+        color: #fff;
+        font-size: 20px;
+        width: 100%;
+        padding-left: 18px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+        display: block;
+      }
+
+      #sidebar a:hover {
+        border-left: 5px solid #921a36;
+        background-color: #2e3c47;
+      }
+
+      .nav-link {
+        margin: 10px 0;
+        display: block;
+        color: #2e3c47;
+        text-decoration: none;
+      }
+
+      .nav-link:hover {
+        color: #fff;
+      }
+
+      #main {
+        float: left;
+        width: 80%;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .grid-table {
+        width: 100%;
+        border-spacing: 20px;
+        margin-top: 60px;
+      }
+
+      .grid-item {
+        width: 30%;
+        height: 180px;
+        background-color: #2e3c47;
+        border: 5px solid #2e3c47;
+        text-align: center;
+        vertical-align: middle;
+        padding: 10px;
+        border-radius: 10px;
+      }
+
+      .grid-item:hover {
+        border: 5px solid #921a36;
+      }
+
+      .grid-item img {
+        width: 80px;
+        height: 80px;
+        vertical-align: middle;
+        margin-bottom: 10px;
+      }
+
+      .grid-item span {
+        display: block;
+        margin-top: 5px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <div id="sidebar">
+        <img
+          src="rsc/logo.png"
+          alt="SyncLync Logo"
+          style="width: auto; height: 40px; margin-bottom: 20px"
+        />
+        <div id="nav-links"></div>
+      </div>
+      <div id="main">
+        <table class="grid-table" id="links-table"></table>
+      </div>
+    </div>
+    <script>
+      // let collections = [
+      //   {
+      //     _id: "665f133dab13c7311a2d1e9a",
+      //     name: "Work Resources",
+      //     links: [
+      //       {
+      //         _id: "665f1342ab13c7311a2d1e9b",
+      //         url: "https://developer.mozilla.org",
+      //         name: "MDN Web Docs",
+      //         icon: "https://developer.mozilla.org/favicon.ico",
+      //         lastAccessedAt: "2025-06-03T10:15:00.000Z",
+      //         createdAt: "2025-06-01T08:00:00.000Z",
+      //         updatedAt: "2025-06-03T10:15:00.000Z",
+      //       },
+      //       {
+      //         _id: "665f1355ab13c7311a2d1e9c",
+      //         url: "https://github.com",
+      //         name: "GitHub",
+      //         icon: "https://github.com/favicon.ico",
+      //         lastAccessedAt: "2025-06-02T18:30:00.000Z",
+      //         createdAt: "2025-06-01T09:30:00.000Z",
+      //         updatedAt: "2025-06-02T18:30:00.000Z",
+      //       },
+      //     ],
+      //     isOwner: true,
+      //   },
+      //   {
+      //     _id: "665f136fab13c7311a2d1e9d",
+      //     name: "Shared Reading List",
+      //     links: [
+      //       {
+      //         _id: "665f1380ab13c7311a2d1e9e",
+      //         url: "https://www.nytimes.com",
+      //         name: "New York Times",
+      //         icon: "https://www.nytimes.com/favicon.ico",
+      //         lastAccessedAt: "2025-06-01T20:00:00.000Z",
+      //         createdAt: "2025-05-30T12:00:00.000Z",
+      //         updatedAt: "2025-06-01T20:00:00.000Z",
+      //       },
+      //     ],
+      //     isOwner: false,
+      //   },
+      //   {
+      //     _id: "665f1400ab13c7311a2d1e9f",
+      //     name: "Inspiration Links",
+      //     links: [
+      //       {
+      //         _id: "665f1412ab13c7311a2d1ea0",
+      //         url: "https://dribbble.com",
+      //         name: "Dribbble",
+      //         icon: "https://cdn.dribbble.com/assets/favicon-192x192-d70ad402693bdd1a8460da7f9f3c590e817da7369c5287789ac968cf6947d214.png",
+      //         lastAccessedAt: "2025-06-02T14:20:00.000Z",
+      //         createdAt: "2025-06-01T14:00:00.000Z",
+      //         updatedAt: "2025-06-02T14:20:00.000Z",
+      //       },
+      //       {
+      //         _id: "665f1429ab13c7311a2d1ea1",
+      //         url: "https://www.behance.net",
+      //         name: "Behance",
+      //         icon: "https://a5.behance.net/d64e1f509265e76b96fe0a7913a566ae98734601/img/site/favicon.png",
+      //         lastAccessedAt: "2025-06-03T07:45:00.000Z",
+      //         createdAt: "2025-06-01T16:00:00.000Z",
+      //         updatedAt: "2025-06-03T07:45:00.000Z",
+      //       },
+      //     ],
+      //     isOwner: false,
+      //   },
+      // ];
+
+      // Render nav-links for each collection
+
+      let collections = [];
+
+      // Fetch collections from API on page load
+      function fetchCollectionsAndRender() {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/collections", true);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              try {
+                collections = JSON.parse(xhr.responseText);
+                renderNavLinks();
+                if (collections.length > 0) {
+                  renderLinksTable(collections[0].links || []);
+                  setActiveNav(0);
+                } else {
+                  document.getElementById("links-table").innerHTML =
+                    "<tr><td>No collections found.</td></tr>";
+                }
+              } catch (e) {
+                window.location.href = "/index.html";
+              }
+            } else {
+              window.location.href = "/index.html";
+            }
+          }
+        };
+        xhr.send();
+      }
+
+      function renderNavLinks() {
+        const navLinksDiv = document.getElementById("nav-links");
+        navLinksDiv.innerHTML = "";
+        collections.forEach((col, idx) => {
+          const a = document.createElement("a");
+          a.href = "#";
+          a.className = "nav-link";
+          a.textContent = col.name;
+          a.dataset.idx = idx;
+          a.onmouseenter = function (e) {
+            e.preventDefault();
+            renderLinksTable(col.links);
+            setActiveNav(idx);
+          };
+          navLinksDiv.appendChild(a);
+        });
+      }
+
+      // Highlight the active nav-link
+      function setActiveNav(activeIdx) {
+        const navLinks = document.querySelectorAll("#nav-links .nav-link");
+        navLinks.forEach((link, idx) => {
+          link.style.backgroundColor = idx === activeIdx ? "#2e3c47" : "";
+          link.style.borderLeft =
+            idx === activeIdx ? "5px solid #921a36" : "5px solid #0d1b2a";
+        });
+      }
+
+      // Render the links as grid-items in a table
+      function renderLinksTable(links) {
+        const table = document.getElementById("links-table");
+        table.innerHTML = "";
+        const perRow = 3;
+        for (let i = 0; i < links.length; i += perRow) {
+          const tr = document.createElement("tr");
+          for (let j = 0; j < perRow; j++) {
+            const td = document.createElement("td");
+            td.className = "grid-item";
+            const link = links[i + j];
+            if (link) {
+              td.style.cursor = "pointer";
+              td.onclick = () => {
+                if (link._id) {
+                  const xhr = new XMLHttpRequest();
+                  xhr.open("PUT", `/api/links/${link._id}/click`, true);
+                  xhr.setRequestHeader("Content-Type", "application/json");
+                  xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                      window.open(link.url, "_blank");
+                    }
+                  };
+                  xhr.send();
+                } else {
+                  window.open(link.url, "_blank");
+                }
+              };
+              td.innerHTML = `
+                <img src="${link.icon}" alt="${link.name}" />
+                <span>${link.name}</span>
+              `;
+            } else {
+              td.innerHTML = "";
+              td.style.background = "transparent";
+              td.style.border = "none";
+              td.style.cursor = "default";
+            }
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+      }
+
+      //Initial fetch and render
+      window.onload = fetchCollectionsAndRender;
+    </script>
+  </body>
+</html>
