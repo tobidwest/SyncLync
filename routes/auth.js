@@ -1,10 +1,13 @@
+// User authentication routes (register, login, logout)
 const express = require("express");
 const validator = require("validator");
 const passport = require("passport");
 const User = require("../models/User");
 
+
 const router = express.Router();
 
+// Create a new account
 router.post("/register", async (req, res) => {
   if (!req.body || !req.body.username || !req.body.password) {
     return res
@@ -29,10 +32,12 @@ router.post("/register", async (req, res) => {
   res.sendStatus(201);
 });
 
+// Authenticate using username and password
 router.post("/login", passport.authenticate("local"), (req, res) => {
   res.sendStatus(200);
 });
 
+// End the session for the current user
 router.post("/logout", (req, res) => {
   req.logout(function (err) {
     if (err) {

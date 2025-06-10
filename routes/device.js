@@ -1,9 +1,11 @@
+// Routes implementing the device authorization flow
 const express = require("express");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const DeviceCode = require("../models/DeviceCode");
 const User = require("../models/User");
 
+// Public base URL of the application used in QR codes
 const BASE_URL = process.env.BASE_URL;
 
 const router = express.Router();
