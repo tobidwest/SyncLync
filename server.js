@@ -38,7 +38,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-db_uri = DB_HOST.replace(
+const db_uri = DB_HOST.replace(
   "<db_username>",
   encodeURIComponent(DB_USERNAME)
 ).replace("<db_password>", encodeURIComponent(DB_PASSWORD));
@@ -452,7 +452,7 @@ app.put("/api/links/:linkId", async (req, res) => {
     $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
   });
   if (!hasAccess) {
-    return res.status(403);
+    return res.sendStatus(403);
   }
 
   const update = {};
@@ -481,7 +481,7 @@ app.post("/api/links/:linkId/click", async (req, res) => {
     $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
   });
   if (!hasAccess) {
-    return res.status(403);
+    return res.sendStatus(403);
   }
   link.lastAccessedAt = new Date();
   link.counter = (link.counter || 0) + 1;
