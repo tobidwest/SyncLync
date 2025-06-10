@@ -141,7 +141,7 @@ app.post("/device/poll", async (req, res, next) => {
     return res.status(400).send("Invalid or expired code");
   }
   if (!device.userId) {
-    return res.status(428).send("Authorization pending");
+    return res.status(202).send("Authorization pending");
   }
   const user = await User.findById(device.userId);
   if (!user) return res.status(500).send("User not found");
