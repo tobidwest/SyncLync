@@ -1,3 +1,4 @@
+// Routes for modifying the currently authenticated user's account
 const express = require("express");
 const validator = require("validator");
 const User = require("../models/User");
@@ -7,6 +8,7 @@ const Link = require("../models/Link");
 
 const router = express.Router();
 
+// Update the logged in user's email
 router.put("/email", async (req, res) => {
   if (!req.body || !req.body.newEmail) {
     return res.status(400).json({ error: "No new email specified" });
@@ -24,6 +26,7 @@ router.put("/email", async (req, res) => {
   res.sendStatus(204);
 });
 
+// Change the user's password and invalidate device codes
 router.put("/password", async (req, res) => {
   if (!req.body || !req.body.oldPassword || !req.body.newPassword) {
     return res.status(400).json({ error: "Old and new password required" });
@@ -46,18 +49,22 @@ router.put("/password", async (req, res) => {
   });
 });
 
+// Delete the user account and all owned data
 router.delete("/", async (req, res) => {
   const userId = req.user._id;
   await Collection.updateMany(
     { sharedWith: userId },
     { $pull: { sharedWith: userId } }
   );
+  // Remove user from shared collections and gather all links from their
+  // own collections so unused links can be deleted later
   const ownedCollections = await Collection.find({ owner: userId });
   const allLinkIds = ownedCollections.reduce((acc, col) => {
     col.linkIds.forEach((id) => acc.add(id.toString()));
     return acc;
   }, new Set());
   await Collection.deleteMany({ owner: userId });
+  // Remove orphaned links that were only used by the deleted collections
   for (const linkId of allLinkIds) {
     const usedElsewhere = await Collection.exists({ linkIds: linkId });
     if (!usedElsewhere) {

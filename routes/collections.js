@@ -1,3 +1,4 @@
+// CRUD operations for collections of links
 const express = require("express");
 const mongoose = require("mongoose");
 const validator = require("validator");
@@ -167,6 +168,7 @@ router.post("/collections/:collectionId/links/:linkId", async (req, res) => {
   });
 });
 
+// Helper to fetch a Google-hosted favicon for a URL
 const getFaviconUrl = (url) => {
   try {
     const { hostname } = new URL(url);
