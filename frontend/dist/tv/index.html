@@ -4,135 +4,62 @@
   <head>
     <title>SyncLync</title>
     <style type="text/css">
+      html,
       body {
         margin: 0;
         padding: 0;
-        background-color: #0d1b2a;
-        font-family: Arial, sans-serif;
-        color: #ffffff;
-        text-align: center;
-      }
-
-      #login-container {
-        margin: 20px auto 0 auto;
-        padding: 40px;
-        width: 400px;
-        background-color: #2e3c47;
-        border-radius: 15px;
-      }
-
-      h1 {
-        margin-bottom: 10px;
-        font-size: 22px;
-      }
-
-      p {
-        margin-bottom: 30px;
-        font-size: 16px;
-        color: #ccc;
-      }
-
-      .qr-box {
-        width: 200px;
-        height: 200px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        padding: 10px !important;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      /* .qr-box img {
+        background: transparent;
         width: 100%;
         height: 100%;
-        display: block;
-      } */
-
-      .footer {
-        margin-top: 30px;
-        font-size: 14px;
-        color: #888888;
+        overflow: hidden;
+        font-family: Open Sans, sans-serif;
+      }
+      #prompt {
+        position: fixed;
+        right: 32px;
+        bottom: 32px;
+        background: rgba(30, 30, 30, 0.85);
+        color: #fff;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 1.1em;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        display: none;
+        align-items: center;
+        gap: 10px;
+        z-index: 1000;
+      }
+      .red-dot {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background: #e53935;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+        border: 2px solid #fff;
       }
     </style>
   </head>
   <body>
-    <img
-      src="rsc/logo.png"
-      alt="SyncLync Logo"
-      style="width: auto; height: 30px; margin-bottom: 20px; padding-top: 120px"
-    />
-    <div id="login-container">
-      <h1>Link your account</h1>
-      <p>Scan this QR code with your phone to continue.</p>
-      <div id="qr-box" class="qr-box">
-        <!-- QR code will be rendered here by JavaScript -->
-      </div>
-      <div class="footer">&copy; 2025 TU Berlin</div>
+    <div id="prompt">
+      <span class="red-dot"></span>
+      Press red button to access SyncLync.
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-      var deviceCode = null;
-
-      function startDeviceAuth() {
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/device/start", true);
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            var data = JSON.parse(xhr.responseText);
-            deviceCode = data.device_code;
-            new QRCode(document.getElementById("qr-box"), {
-              text: data.verification_uri,
-              width: 200,
-              height: 200,
-              colorDark: "#000000",
-              colorLight: "#ffffff",
-            });
-            // DEBUG Show device code until verification screen is ready
-            console.log("Device code:", data.verification_uri);
-
-            // Make sure the generated QR code fills the box
-            var qrImg = document.querySelector("#qr-box img");
-            if (qrImg) {
-              qrImg.style.width = "100%";
-              qrImg.style.height = "100%";
-              qrImg.style.display = "block";
-            }
-
-            pollForAuth();
-          }
-        };
-        xhr.send();
-      }
-
-      function pollForAuth() {
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/device/poll", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-              // Authenticated!
-              window.location.href = "/tv/app.html";
-            } else if (xhr.status === 428) {
-              // Authorization pending, poll again after delay
-              setTimeout(pollForAuth, 2000);
-            } else {
-              // Error (expired, invalid, etc)
-              document.getElementById("login-container").innerHTML =
-                "<h1>Link failed</h1><p>Code expired or invalid. Please reload.</p>";
-            }
-          }
-        };
-        try {
-          xhr.send(JSON.stringify({ device_code: deviceCode }));
-        } catch (e) {
-          setTimeout(pollForAuth, 2000);
+      setTimeout(() => {
+        const prompt = document.getElementById("prompt");
+        prompt.style.display = "flex";
+        setTimeout(() => {
+          prompt.style.display = "none";
+        }, 5000);
+      }, 1000);
+      //   press key "r" to debug in browser
+      document.addEventListener("keydown", function (event) {
+        if (event.keyCode === 403 || event.key === "r") {
+          window.location.href = "login.html";
         }
-      }
-
-      startDeviceAuth();
+      });
     </script>
   </body>
 </html>
