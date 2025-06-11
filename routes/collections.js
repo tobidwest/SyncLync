@@ -14,10 +14,16 @@ router.get("/collections", async (req, res) => {
     $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
   }).populate("linkIds");
   const result = collections.map((col) => {
-    // Sort links by counter descending
-    const sortedLinks = [...col.linkIds].sort(
-      (a, b) => (b.counter || 0) - (a.counter || 0)
-    );
+    // Sort links based on user sorting preference
+    let sortedLinks = [...col.linkIds];
+    const sortPref = req.user.sorting || "counter";
+    if (sortPref === "alphabetically") {
+      sortedLinks.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortPref === "created") {
+      sortedLinks.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    } else {
+      sortedLinks.sort((a, b) => (b.counter || 0) - (a.counter || 0));
+    }
     return {
       _id: col._id,
       name: col.name,

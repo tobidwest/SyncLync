@@ -288,6 +288,13 @@
 
       //Initial fetch and render
       window.onload = fetchCollectionsAndRender;
+
+      // Button navigation
+      document.addEventListener("keydown", function (event) {
+        if (event.keyCode === 403 || event.key === "r") {
+          window.location.href = "index.html";
+        }
+      });
     </script>
   </body>
 </html>

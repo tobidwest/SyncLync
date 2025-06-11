@@ -76,5 +76,28 @@ router.delete("/", async (req, res) => {
     res.sendStatus(204);
   });
 });
+// Get the current user's account information
+router.get("/", (req, res) => {
+  const userInfo = {
+    username: req.user.username,
+    sorting: req.user.sorting,
+  };
+  res.json(userInfo);
+});
+
+// Update the user's sorting preference
+router.put("/sorting", async (req, res) => {
+  if (!req.body || typeof req.body.sorting === "undefined") {
+    return res.status(400).json({ error: "No sorting preference specified" });
+  }
+  const { sorting } = req.body;
+  const allowed = ["counter", "created", "alphabetically"];
+  if (!allowed.includes(sorting)) {
+    return res.status(400).json({ error: "Invalid sorting preference" });
+  }
+  req.user.sorting = sorting;
+  await req.user.save();
+  res.sendStatus(204);
+});
 
 module.exports = router;

@@ -4,6 +4,11 @@ const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true },
   password: String,
+  sorting: {
+    type: String,
+    enum: ["counter", "created", "alphabetically"],
+    default: "counter",
+  },
 });
 
 userSchema.methods.setPassword = async function (password) {
