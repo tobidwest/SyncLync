@@ -102,7 +102,8 @@ var loginUtils = {
           stateUtitls.displayCorrectState();
         } else if (xhr.status === 202) {
           // Authorization pending, poll again after delay
-          setTimeout(loginUtils.pollForAuth, 2000); 
+          setTimeout(loginUtils.pollForAuth, 2000);
+        } else {
           // Error (expired, invalid, etc)
           document.getElementById("login-container").innerHTML =
             "<h1>Something went wrong</h1><p>Please press the red button twice to try again.</p>";
