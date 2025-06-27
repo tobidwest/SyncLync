@@ -7,16 +7,49 @@ var stateUtitls = {
     // -----------------------
     // - when this function should be called:
     // - pollForAuth must be changed so it calls this function once the login has finished
-    // - this function must be called after red button press via scene.showAppArea and scene.hideAppArea in rc-interaction.js
+    // - this function must be called after red button press via scene.showAppArea and scene.hideAppArea in rc-interaction.js (X)
     //   OR via a listener that checks it the app area visibility changes
     // - the code below contains window.location.href in some places, especially when an error occurs. instead of refreshing,
     //   the state should be set accordingly (and in some cases data may need to be refreshed, e.g. new authorization attempt –
     //   this might still need to be implemented in this or a new function)
+
+    //TODO: What is meant by "(and in some cases data may need to be refreshed, e.g. new authorization attempt –
+    //   this might still need to be implemented in this or a new function)" ??
+
+
     // -----------------------
     // then (we can do this together after everything else works and after pc frontend is uploaded):
     // - implement button navigation rc-interaction.js
     // -----------------------
     // thank you!!
+
+   
+    //check whether device is authenticated
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "/api/collections", true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+
+          //Device is already authenticated, display links
+          document.getElementById('state-login').style.visibility = 'hidden';
+          document.getElementById('state-linklist').style.visibility = 'visible';
+          linkUtils.fetchCollectionsAndRender(); 
+
+        } else if (xhr.status === 401) {
+
+          //Device is not authenticated, display login
+          console.log(
+            "The 401 erorr you see in the console is intended. You are not logged in, starting device auth..."
+          );
+          document.getElementById('state-linklist').style.visibility = 'hidden';
+          document.getElementById('state-login').style.visibility = 'visible';
+          loginUtils.startDeviceAuth();
+
+        }
+      }
+    };
+    xhr.send();
   },
 };
 
@@ -52,7 +85,7 @@ var loginUtils = {
         document.getElementById("login-logo").style.opacity = "1";
         document.getElementById("login-container").style.opacity = "1";
 
-        this.pollForAuth();
+        loginUtils.pollForAuth();
       }
     };
     xhr.send();
@@ -66,11 +99,10 @@ var loginUtils = {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           // Authenticated!
-          window.location.href = "/tv/app.html";
+          stateUtitls.displayCorrectState();
         } else if (xhr.status === 202) {
           // Authorization pending, poll again after delay
-          setTimeout(pollForAuth, 2000);
-        } else {
+          setTimeout(loginUtils.pollForAuth, 2000); 
           // Error (expired, invalid, etc)
           document.getElementById("login-container").innerHTML =
             "<h1>Something went wrong</h1><p>Please press the red button twice to try again.</p>";
@@ -80,10 +112,11 @@ var loginUtils = {
     try {
       xhr.send(JSON.stringify({ device_code: deviceCode }));
     } catch (e) {
-      setTimeout(pollForAuth, 2000);
+      setTimeout(loginUtils.pollForAuth, 2000); 
     }
   },
 
+  //TODO: Delete this function ?
   checkLoginStatus: function () {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", "/api/collections", true);
@@ -114,20 +147,22 @@ var linkUtils = {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           try {
-            this.collections = JSON.parse(xhr.responseText);
-            this.renderNavLinks();
-            if (this.collections.length > 0) {
-              this.renderLinksTable(this.collections[0].links || []);
-              this.setActiveNav(0);
+            linkUtils.collections = JSON.parse(xhr.responseText);
+            linkUtils.renderNavLinks();
+            if (linkUtils.collections.length > 0) {
+              linkUtils.renderLinksTable(linkUtils.collections[0].links || []);
+              linkUtils.setActiveNav(0);
             } else {
               document.getElementById("links-table").innerHTML =
                 "<tr><td>No collections found.</td></tr>";
             }
           } catch (e) {
-            window.location.href = "login.html";
+            //window.location.href = "login.html";
+            stateUtitls.displayCorrectState();
           }
         } else {
-          window.location.href = "login.html";
+          //window.location.href = "login.html";
+          stateUtitls.displayCorrectState();
         }
       }
     };
@@ -137,7 +172,7 @@ var linkUtils = {
   renderNavLinks: function () {
     const navLinksDiv = document.getElementById("nav-links");
     navLinksDiv.innerHTML = "";
-    this.collections.forEach((col, idx) => {
+    linkUtils.collections.forEach((col, idx) => {
       const a = document.createElement("a");
       a.href = "#";
       a.className = "nav-link";
@@ -145,8 +180,8 @@ var linkUtils = {
       a.dataset.idx = idx;
       a.onmouseenter = function (e) {
         e.preventDefault();
-        this.renderLinksTable(col.links);
-        this.setActiveNav(idx);
+        linkUtils.renderLinksTable(col.links);
+        linkUtils.setActiveNav(idx);
       };
       navLinksDiv.appendChild(a);
     });
