@@ -137,6 +137,13 @@ function handleKeyCode(kc) {
         } else {
           scene.showAppArea();
         }
+
+        setTimeout(function() {
+          stateUtitls.displayCorrectState();
+        }, 500); // wait for 500ms to ensure that UI change is completed
+
+
+
         // no need to rerender complete scene
         shouldRender = false;
         break;
