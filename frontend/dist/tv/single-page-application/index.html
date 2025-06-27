@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//HbbTV//1.1.1//EN" "http://www.hbbtv.org/dtd/HbbTV-1.1.1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>SyncLync</title>
+    <meta
+      http-equiv="Content-Type"
+      content="application/vnd.hbbtv.xhtml+xml; utf-8"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="text/javascript" src="scripts.js"></script>
+    <script type="text/javascript" src="rc-buttons.js"></script>
+    <script type="text/javascript" src="rc-interaction.js"></script>
+  </head>
+
+  <body onload="start();">
+    <div>
+      <object
+        type="application/oipfApplicationManager"
+        id="applicationManager"
+      ></object>
+    </div>
+    <div class="safe_area" id="app_area">
+      <div id="state-login" style="visibility: hidden">
+        <img src="rsc/logo.png" alt="SyncLync Logo" id="login-logo" />
+        <div id="login-container">
+          <h1>Link your account</h1>
+          <p>Scan this QR code with your phone to continue.</p>
+          <div id="login-qr-box">
+            <!-- QR code will be rendered here by JavaScript -->
+          </div>
+          <div class="footer">&copy; 2025 TU Berlin</div>
+        </div>
+      </div>
+      <div id="state-linklist" style="visibility: hidden">
+        <div class="sidebar">
+          <img src="rsc/logo.png" alt="SyncLync Logo" class="logo" />
+          <div class="nav-links"></div>
+        </div>
+        <div class="main">
+          <table class="grid-table" id="links-table"></table>
+        </div>
+      </div>
+    </div>
+    <div id="red_button_notification_field">
+      <span class="red-dot"></span>
+      Press red button to access SyncLync.
+    </div>
+  </body>
+</html>

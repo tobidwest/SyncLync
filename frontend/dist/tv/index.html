@@ -1,8 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html PUBLIC "-//HbbTV//1.1.1//EN" "http://www.hbbtv.org/dtd/HbbTV-1.1.1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>SyncLync</title>
+    <meta
+      http-equiv="Content-Type"
+      content="application/vnd.hbbtv.xhtml+xml; utf-8"
+    />
+    <script type="text/javascript" src="rc-buttons.js"></script>
     <style type="text/css">
       html,
       body {
@@ -13,6 +17,13 @@
         height: 100%;
         overflow: hidden;
         font-family: Open Sans, sans-serif;
+      }
+      object#applicationManager {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 0px;
+        height: 0px;
       }
       #prompt {
         position: fixed;
@@ -42,16 +53,29 @@
     </style>
   </head>
   <body>
+    <div>
+      <object
+        type="application/oipfApplicationManager"
+        id="applicationManager"
+      ></object>
+    </div>
     <div id="prompt">
       <span class="red-dot"></span>
       Press red button to access SyncLync.
     </div>
     <script>
+      function start() {
+        try {
+          var appManager = document.getElementById("applicationManager");
+          var appObject = appManager.getOwnerApplication(document);
+        } catch (e) {}
+      }
+
       setTimeout(() => {
         const prompt = document.getElementById("prompt");
-        prompt.style.display = "flex";
+        prompt.style.visability = "visible";
         setTimeout(() => {
-          prompt.style.display = "none";
+          prompt.style.visability = "hidden";
         }, 5000);
       }, 1000);
 
@@ -62,6 +86,5 @@
         }
       });
     </script>
-    </div>
   </body>
 </html>

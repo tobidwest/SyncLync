@@ -1,0 +1,198 @@
+body {
+  background-color: transparent;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  color: white;
+  font-family: Open Sans, sans-serif !important;
+}
+
+object#applicationManager {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 0px;
+  height: 0px;
+}
+
+/* safe area as recommended in the standard */
+div.safe_area {
+  position: absolute;
+  left: 128px;
+  top: 36px;
+  width: 1024px;
+  height: 648px;
+  background-color: #0d1b2aee;
+  border-radius: 10px;
+  padding: 25px;
+}
+
+/* set application area invisble as initial state (we need to press the red button, so application scene shows) */
+div#app_area {
+  visibility: hidden;
+}
+
+/* actual style settings */
+#red_button_notification_field {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  background: rgba(30, 30, 30, 0.85);
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  visibility: hidden;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+}
+
+#red_button_notification_field .red-dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: #e53935;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  border: 2px solid #fff;
+}
+
+#state-login {
+  text-align: center;
+}
+
+#state-login #login-logo {
+  width: auto;
+  height: 30px;
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+
+#state-login #login-container {
+  margin: 0 auto 0 auto;
+  padding: 40px;
+  width: 400px;
+  background-color: #2e3c47;
+  border-radius: 15px;
+}
+
+#state-login #login-container h1 {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+#state-login #login-container p {
+  margin-bottom: 30px;
+  font-size: 16px;
+  color: #ccc;
+}
+
+#state-login #login-container #login-qr-box {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  padding: 10px !important;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#state-login #login-container .footer {
+  margin-top: 30px;
+  font-size: 14px;
+  color: #888888;
+}
+
+#state-linklist {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#state-linklist .sidebar .logo {
+  width: auto;
+  height: 40px;
+  margin-bottom: 20px;
+}
+
+#state-linklist .sidebar {
+  float: left;
+  width: 20%;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#state-linklist .sidebar a {
+  border-left: 5px solid #0d1b2a;
+  color: #fff;
+  font-size: 20px;
+  width: 100%;
+  padding-left: 18px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  display: block;
+}
+
+#state-linklist .sidebar a:hover {
+  border-left: 5px solid #921a36;
+  background-color: #2e3c47;
+}
+
+#state-linklist .nav-link {
+  margin: 10px 0;
+  display: block;
+  color: #2e3c47;
+  text-decoration: none;
+}
+
+#state-linklist .nav-link:hover {
+  color: #fff;
+}
+
+#state-linklist .main {
+  float: left;
+  width: 80%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#state-linklist .grid-table {
+  width: 100%;
+  border-spacing: 20px;
+  margin-top: 60px;
+}
+
+#state-linklist .grid-item {
+  width: 30%;
+  height: 180px;
+  background-color: #2e3c47;
+  border: 5px solid #2e3c47;
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#state-linklist .grid-item:hover {
+  border: 5px solid #921a36;
+}
+
+#state-linklist .grid-item img {
+  width: 80px;
+  height: 80px;
+  vertical-align: middle;
+  margin-bottom: 10px;
+}
+
+#state-linklist .grid-item span {
+  display: block;
+  margin-top: 5px;
+  font-size: 18px;
+}
