@@ -134,14 +134,17 @@ function handleKeyCode(kc) {
         // red button shows & hides the app scene
         if (scene.isAppAreaVisible) {
           scene.hideAppArea();
+
+          stateUtitls.hideEverything();
+
         } else {
           scene.showAppArea();
+
+          setTimeout(function() {
+            stateUtitls.displayCorrectState();
+          }, 500); // wait for 500ms to ensure that UI change is completed
+          
         }
-
-        setTimeout(function() {
-          stateUtitls.displayCorrectState();
-        }, 500); // wait for 500ms to ensure that UI change is completed
-
 
 
         // no need to rerender complete scene
