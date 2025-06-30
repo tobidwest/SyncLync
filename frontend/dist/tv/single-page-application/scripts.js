@@ -51,6 +51,12 @@ var stateUtitls = {
     };
     xhr.send();
   },
+
+  //hide all elements when app area is hidden
+  hideEverything: function () {
+    document.getElementById('state-login').style.visibility = 'hidden';
+    document.getElementById('state-linklist').style.visibility = 'hidden';
+  }
 };
 
 var loginUtils = {
