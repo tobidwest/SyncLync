@@ -149,6 +149,9 @@ var loginUtils = {
 
 var linkUtils = {
   collections: [],
+  activeNavIndex: 0,         // aktuell ausgewählte Collection
+  currentFocusedCell: null,  // Fokus in der Links-Tabelle (TD)
+  currentFocusedNavLink: null, // Fokus in der Navi (A)
 
   // Fetch collections from API on page load
   fetchCollectionsAndRender: function () {
@@ -189,10 +192,12 @@ var linkUtils = {
       a.className = "nav-link";
       a.textContent = col.name;
       a.dataset.idx = idx;
+      a.tabIndex = 0; //
       a.onmouseenter = function (e) {
         e.preventDefault();
         linkUtils.renderLinksTable(col.links);
         linkUtils.setActiveNav(idx);
+        linkUtils.focusNavLink(a); // Fokus auch auf Navi-Element setzen
       };
       navLinksDiv.appendChild(a);
     });
@@ -200,19 +205,22 @@ var linkUtils = {
 
   // Highlight the active nav-link
   setActiveNav: function (activeIdx) {
+    linkUtils.activeNavIndex = activeIdx;
     const navLinks = document.querySelectorAll("#nav-links .nav-link");
     navLinks.forEach((link, idx) => {
       link.style.backgroundColor = idx === activeIdx ? "#2e3c47" : "";
-      link.style.borderLeft =
-        idx === activeIdx ? "5px solid #921a36" : "5px solid #1d2a38";
+      link.style.borderLeft = idx === activeIdx ? "5px solid #921a36" : "5px solid #1d2a38";
     });
   },
+
+
 
   // Render the links as grid-items in a table
   renderLinksTable: function (links) {
     const table = document.getElementById("links-table");
     table.innerHTML = "";
     const perRow = 3;
+
     for (let i = 0; i < links.length; i += perRow) {
       const tr = document.createElement("tr");
       for (let j = 0; j < perRow; j++) {
@@ -220,8 +228,11 @@ var linkUtils = {
         td.className = "grid-item";
         const link = links[i + j];
         if (link) {
+          td.tabIndex = 0; //
           td.style.cursor = "pointer";
-          td.onclick = () => {
+          td.dataset.linkUrl = link.url; // <-- neu hinzugefügt
+          td.dataset.linkId = link._id || ""; // <-- neu hinzugefügt
+          /*td.onclick = () => {
             if (link._id) {
               const xhr = new XMLHttpRequest();
               xhr.open("POST", `/api/links/${link._id}/click`, true);
@@ -235,11 +246,15 @@ var linkUtils = {
             } else {
               window.open(link.url, "_blank");
             }
+          };*/
+          td.onclick = function () {
+            linkUtils.activateLink(td); // <-- geändert
           };
           td.innerHTML = `
                 <img src="${link.icon}" alt="${link.name}" />
                 <span>${link.name}</span>
               `;
+
         } else {
           td.innerHTML = "";
           td.style.background = "transparent";
@@ -250,5 +265,63 @@ var linkUtils = {
       }
       table.appendChild(tr);
     }
+
+    // erste Zelle fokussieren
+    const firstCell = table.querySelector(".grid-item[tabindex='0']"); // <-- neu hinzugefügt //TODO: Was tun, wenn keine Links vorhanden in Collection?
+    if (firstCell) {
+      linkUtils.focusCell(firstCell); // <-- neu hinzugefügt
+    }
   },
+
+  focusNavLink: function (navLink) {
+    if (linkUtils.currentFocusedNavLink) {
+      linkUtils.currentFocusedNavLink.classList.remove("focused-nav");
+    }
+    navLink.focus();
+    navLink.classList.add("focused-nav");
+    linkUtils.currentFocusedNavLink = navLink;
+
+    // Fokus in Tabelle aufheben
+    if (linkUtils.currentFocusedCell) {
+      linkUtils.currentFocusedCell.classList.remove("focused");
+      linkUtils.currentFocusedCell = null;
+    }
+  },
+
+  focusCell: function (cell) {
+    if (linkUtils.currentFocusedCell) {
+      linkUtils.currentFocusedCell.classList.remove("focused");
+    }
+    cell.focus();
+    cell.classList.add("focused");
+    linkUtils.currentFocusedCell = cell;
+
+    // Fokus in Navi aufheben
+    if (linkUtils.currentFocusedNavLink) {
+      linkUtils.currentFocusedNavLink.classList.remove("focused-nav");
+      linkUtils.currentFocusedNavLink = null;
+    }
+  },
+
+  activateLink: function (el) { // <-- neu
+    const linkId = el.dataset.linkId;
+    const linkUrl = el.dataset.linkUrl;
+
+    if (linkId) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `/api/links/${linkId}/click`, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          window.open(linkUrl, "_blank");
+        }
+      };
+      xhr.send(JSON.stringify({}));
+    } else if (linkUrl) {
+      window.open(linkUrl, "_blank");
+    }
+  }
+
+
+  
 };
