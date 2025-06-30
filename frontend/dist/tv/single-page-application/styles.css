@@ -196,3 +196,14 @@ div#app_area {
   margin-top: 5px;
   font-size: 18px;
 }
+
+.grid-item.focused {
+  outline: 2px solid red;
+}
+
+.focused-nav {
+  background-color: #2e3c47;
+  border-left: 5px solid #921a36;
+  outline: none;
+  outline: 2px solid red;
+}
