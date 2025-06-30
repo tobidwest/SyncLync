@@ -134,6 +134,7 @@ function handleKeyCode(kc) {
     switch (kc) {
       case VK_RED:
         // red button shows & hides the app scene
+        console.log("red")//TODO REMOVE
         if (scene.isAppAreaVisible) {
           scene.hideAppArea();
 
@@ -180,25 +181,149 @@ function handleKeyCode(kc) {
       //   break;
       // TODO change focus
       case VK_LEFT:
-        // left button
-        focusPrevious();
+        if (linkUtils.currentFocusedCell) {
+          const currentCell = linkUtils.currentFocusedCell;
+          const currentRow = currentCell.parentElement;
+          const cellsInRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const cellIndex = cellsInRow.indexOf(currentCell);
+
+          if (cellIndex === 0) {
+            // Fokus von Tabelle zu Navi springen (auf aktuell aktive Nav)
+            const navLinks = document.querySelectorAll("#nav-links .nav-link");
+            const navLinkToFocus = navLinks[linkUtils.activeNavIndex] || navLinks[0];
+            if (navLinkToFocus) {
+              linkUtils.focusNavLink(navLinkToFocus);
+            }
+          } else {
+            // Eine Zelle nach links in Tabelle
+            const targetCell = cellsInRow[cellIndex - 1];
+            linkUtils.focusCell(targetCell);
+          }
+        }
         break;
+
       case VK_RIGHT:
-        // right button
-        focusNext();
+        if (linkUtils.currentFocusedNavLink) {
+          // Fokus von Navi zurück in Tabelle: Erste Zelle der aktuell aktiven Links-Tabelle-Zeile fokussieren
+          const linksTable = document.getElementById("links-table");
+          const rows = linksTable.querySelectorAll("tr");
+          if (rows.length > 0) {
+            const firstCell = rows[0].querySelector(".grid-item");
+            if (firstCell) {
+              linkUtils.focusCell(firstCell);
+            }
+          }
+        } else if (linkUtils.currentFocusedCell) {
+          const currentCell = linkUtils.currentFocusedCell;
+          const currentRow = currentCell.parentElement;
+          const cellsInRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const cellIndex = cellsInRow.indexOf(currentCell);
+
+          let targetCell;
+          if (cellIndex === cellsInRow.length - 1) {
+            targetCell = cellsInRow[0];
+          } else {
+            targetCell = cellsInRow[cellIndex + 1];
+          }
+
+          // Prüfen, ob targetCell einen Link (data-link-url) enthält
+          if (targetCell.hasAttribute("data-link-url")) {
+            linkUtils.focusCell(targetCell);
+          }
+          // sonst nichts tun, Fokus bleibt auf currentCell
+        }
         break;
+
+
       case VK_DOWN:
-        // down button
-        // TODO implement - something like if (currentIndex - cols >= 0) nextIndex -= 3;
+        if (linkUtils.currentFocusedNavLink) {
+          // Fokus in Navi: eine Collection nach unten (wrap-around bleibt)
+          const navLinks = Array.from(document.querySelectorAll("#nav-links .nav-link"));
+          let idx = navLinks.indexOf(linkUtils.currentFocusedNavLink);
+          idx = (idx + 1) % navLinks.length;
+          linkUtils.focusNavLink(navLinks[idx]);
+        } else if (linkUtils.currentFocusedCell) {
+          const currentCell = linkUtils.currentFocusedCell;
+          const table = currentCell.closest("table");
+          const currentRow = currentCell.parentElement;
+          const rows = Array.from(table.querySelectorAll("tr"));
+          const cellsInCurrentRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const colIndex = cellsInCurrentRow.indexOf(currentCell);
+
+          let rowIndex = rows.indexOf(currentRow);
+
+          // KEIN wrap-around nach oben, also nur vorwärts, wenn nicht letzte Zeile
+          if (rowIndex < rows.length - 1) {
+            rowIndex = rowIndex + 1;
+
+            const targetRow = rows[rowIndex];
+            const targetCells = Array.from(targetRow.querySelectorAll(".grid-item"));
+
+            const targetCell = targetCells[colIndex] || targetCells[targetCells.length - 1];
+
+            if (targetCell.hasAttribute("data-link-url")) {
+              linkUtils.focusCell(targetCell);
+            }
+          }
+          // sonst Fokus bleibt auf currentCell (keine Aktion)
+        }
         break;
+
+
       case VK_UP:
-        // up button
-        // TODO implement
+        if (linkUtils.currentFocusedNavLink) {
+          // Fokus in Navi: eine Collection nach oben (wrap-around bleibt)
+          const navLinks = Array.from(document.querySelectorAll("#nav-links .nav-link"));
+          let idx = navLinks.indexOf(linkUtils.currentFocusedNavLink);
+          idx = (idx - 1 + navLinks.length) % navLinks.length;
+          linkUtils.focusNavLink(navLinks[idx]);
+        } else if (linkUtils.currentFocusedCell) {
+          const currentCell = linkUtils.currentFocusedCell;
+          const table = currentCell.closest("table");
+          const currentRow = currentCell.parentElement;
+          const rows = Array.from(table.querySelectorAll("tr"));
+          const cellsInCurrentRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const colIndex = cellsInCurrentRow.indexOf(currentCell);
+
+          let rowIndex = rows.indexOf(currentRow);
+
+          // KEIN wrap-around nach unten, also nur rückwärts, wenn nicht erste Zeile
+          if (rowIndex > 0) {
+            rowIndex = rowIndex - 1;
+
+            const targetRow = rows[rowIndex];
+            const targetCells = Array.from(targetRow.querySelectorAll(".grid-item"));
+
+            const targetCell = targetCells[colIndex] || targetCells[targetCells.length - 1];
+
+            if (targetCell.hasAttribute("data-link-url")) {
+              linkUtils.focusCell(targetCell);
+            }
+          }
+          // sonst Fokus bleibt auf currentCell (keine Aktion)
+        }
         break;
+
+
       case VK_ENTER:
-        // OK/ENTER button
-        activateFocusedItem();
+        if (linkUtils.currentFocusedNavLink) {
+          // Aktiviere die Collection (wie z.B. bei Hover)
+          const idx = parseInt(linkUtils.currentFocusedNavLink.dataset.idx, 10);
+          if (!isNaN(idx)) {
+            linkUtils.setActiveNav(idx);
+            linkUtils.renderLinksTable(linkUtils.collections[idx].links || []);
+            // Fokus bleibt auf Navi-Link (optional)
+            linkUtils.focusNavLink(linkUtils.currentFocusedNavLink);
+          }
+        } else if (linkUtils.currentFocusedCell) {
+          // Link in Tabelle aktivieren (wie bisher)
+          linkUtils.activateLink(linkUtils.currentFocusedCell);
+        }
         break;
+
+
+        //activateFocusedItem();
+       // break;
       //  REMOVE
       // case VK_BACK:
       //   // BACK button
