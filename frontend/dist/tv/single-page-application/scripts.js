@@ -210,7 +210,7 @@ var linkUtils = {
     navLinks.forEach((link, idx) => {
       link.style.backgroundColor = idx === activeIdx ? "#2e3c47" : "";
       link.style.borderLeft =
-        idx === activeIdx ? "5px solid #921a36" : "5px solid #0d1b2a";
+        idx === activeIdx ? "5px solid #921a36" : "5px solid #1d2a38";
     });
   },
 
