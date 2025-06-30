@@ -69,13 +69,23 @@ var loginUtils = {
       if (xhr.readyState === 4 && xhr.status === 200) {
         var data = JSON.parse(xhr.responseText);
         deviceCode = data.device_code;
-        new QRCode(document.getElementById("login-qr-box"), {
+
+        var qrBox = document.getElementById("login-qr-box");
+
+        // remove existing, previously generated QR-codes
+        while (qrBox.firstChild) {
+          qrBox.removeChild(qrBox.firstChild);
+        }
+
+        // generate new QR-Code
+        new QRCode(qrBox, {
           text: data.verification_uri,
           width: 200,
           height: 200,
           colorDark: "#000000",
           colorLight: "#ffffff",
         });
+
         // Show device code in console for debugging
         console.log("Device code:", data.verification_uri);
 
