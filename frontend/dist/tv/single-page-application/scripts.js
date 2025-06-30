@@ -16,36 +16,30 @@ var stateUtitls = {
     //TODO: What is meant by "(and in some cases data may need to be refreshed, e.g. new authorization attempt –
     //   this might still need to be implemented in this or a new function)" ??
 
-
     // -----------------------
     // then (we can do this together after everything else works and after pc frontend is uploaded):
     // - implement button navigation rc-interaction.js
     // -----------------------
     // thank you!!
 
-   
     //check whether device is authenticated
     const xhr = new XMLHttpRequest();
     xhr.open("GET", "/api/collections", true);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-
           //Device is already authenticated, display links
-          document.getElementById('state-login').style.display = 'none';
-          document.getElementById('state-linklist').style.display = 'block';
-          linkUtils.fetchCollectionsAndRender(); 
-
+          document.getElementById("state-login").style.display = "none";
+          document.getElementById("state-linklist").style.display = "block";
+          linkUtils.fetchCollectionsAndRender();
         } else if (xhr.status === 401) {
-
           //Device is not authenticated, display login
           console.log(
             "The 401 erorr you see in the console is intended. You are not logged in, starting device auth..."
           );
-          document.getElementById('state-linklist').style.display = 'none';
-          document.getElementById('state-login').style.display = 'block';
+          document.getElementById("state-linklist").style.display = "none";
+          document.getElementById("state-login").style.display = "block";
           loginUtils.startDeviceAuth();
-
         }
       }
     };
@@ -54,9 +48,9 @@ var stateUtitls = {
 
   //hide all elements when app area is hidden
   hideEverything: function () {
-    document.getElementById('state-login').style.display = 'none';
-    document.getElementById('state-linklist').style.display = 'block';
-  }
+    document.getElementById("state-login").style.display = "none";
+    document.getElementById("state-linklist").style.display = "block";
+  },
 };
 
 var loginUtils = {
@@ -129,7 +123,7 @@ var loginUtils = {
     try {
       xhr.send(JSON.stringify({ device_code: deviceCode }));
     } catch (e) {
-      setTimeout(loginUtils.pollForAuth, 2000); 
+      setTimeout(loginUtils.pollForAuth, 2000);
     }
   },
 
