@@ -49,7 +49,7 @@ var stateUtitls = {
   //hide all elements when app area is hidden
   hideEverything: function () {
     document.getElementById("state-login").style.display = "none";
-    document.getElementById("state-linklist").style.display = "block";
+    document.getElementById("state-linklist").style.display = "none";
   },
 };
 
