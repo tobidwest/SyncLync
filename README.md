@@ -12,6 +12,7 @@ SyncLync lets you curate and share collections of links, then display them on an
 ## 🚀 Setup
 1. run docker compose up -d 
 2. use application at localhost:8080
+3. TV frontend at localhost:8080/tv/single-page-application/
 
 ## 💪 Contributing
 Contributions are welcome! See open issues and for ideas.
