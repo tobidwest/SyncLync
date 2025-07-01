@@ -10,11 +10,8 @@ SyncLync lets you curate and share collections of links, then display them on an
 - 🔒 Manage your account (update email, change password, delete account)
 
 ## 🚀 Setup
-1. Install dependencies with `npm install`.
-2. Provide environment variables (`PORT`, `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `SESSION_SECRET`, `BASE_URL`).
-3. Run `node server.js`.
-
-In a future version, a Docker script will be added to run the app.
+1. run docker compose up -d 
+2. use application at localhost:8080
 
 ## 💪 Contributing
 Contributions are welcome! See open issues and for ideas.
