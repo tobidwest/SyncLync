@@ -71,6 +71,10 @@ app.use("/api/account", accountRoutes);
 const distPath = path.join(__dirname, "frontend", "dist");
 app.use(express.static(distPath));
 
+app.get("/{*splat}", (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
+});
+
 // Start the API server
 app.listen(PORT, () => {
   console.log(`ℹ️ API server is running on ${PORT}`);

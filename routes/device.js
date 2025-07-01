@@ -30,7 +30,7 @@ router.get("/:userCode", async (req, res) => {
   if (!device || device.expiresAt < new Date()) {
     return res.status(400).send("Code expired or invalid");
   }
-  res.sendFile(path.join(__dirname, "frontend/device-confirm.html"));
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 // URL called after user confirms the device
