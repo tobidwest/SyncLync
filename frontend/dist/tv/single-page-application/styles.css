@@ -128,7 +128,6 @@ div#app_area {
 }
 
 #state-linklist .sidebar a {
-  border-left: 5px solid #1d2a38;
   color: #fff;
   font-size: 20px;
   width: 100%;
@@ -140,9 +139,12 @@ div#app_area {
   display: block;
 }
 
-#state-linklist .sidebar a:hover {
-  border-left: 5px solid #921a36;
+#state-linklist .sidebar a:hover,
+#state-linklist .focused-nav {
+  border: 5px solid #921a36;
+  border-left: 5px solid #921a36 !important;
   background-color: #2e3c47;
+  outline: none;
 }
 
 #state-linklist .nav-link {
@@ -159,14 +161,25 @@ div#app_area {
 #state-linklist .main {
   float: left;
   width: 70%;
+  height: 580px;
   padding: 20px;
   box-sizing: border-box;
+}
+
+#state-linklist .main {
+  overflow-y: auto;
+  max-height: 100%;
+  display: block;
 }
 
 #state-linklist .grid-table {
   width: 100%;
   border-spacing: 20px;
   margin-top: 60px;
+}
+
+#state-linklist .grid-table tr {
+  scroll-snap-align: start;
 }
 
 #state-linklist .grid-item {
@@ -180,8 +193,10 @@ div#app_area {
   border-radius: 10px;
 }
 
-#state-linklist .grid-item:hover {
+#state-linklist .grid-item:hover,
+#state-linklist .grid-item.focused {
   border: 5px solid #921a36;
+  outline: none;
 }
 
 #state-linklist .grid-item img {
@@ -197,13 +212,11 @@ div#app_area {
   font-size: 18px;
 }
 
-.grid-item.focused {
-  outline: 2px solid red;
+::-webkit-scrollbar {
+  display: none;
 }
 
-.focused-nav {
-  background-color: #2e3c47;
-  border-left: 5px solid #921a36;
-  outline: none;
-  outline: 2px solid red;
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
