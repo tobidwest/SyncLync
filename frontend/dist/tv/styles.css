@@ -160,14 +160,21 @@ div#app_area {
 
 #state-linklist .main {
   float: left;
-  width: 70%;
-  height: 580px;
+  width: 65%;
   padding: 20px;
   box-sizing: border-box;
 }
 
 #state-linklist .main {
   overflow-y: auto;
+  height: 610px;
+  max-height: 100%;
+  display: block;
+}
+
+#state-linklist .sidebar .nav-links {
+  overflow-y: auto;
+  height: 530px;
   max-height: 100%;
   display: block;
 }
@@ -219,4 +226,19 @@ div#app_area {
 * {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.state-container {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  right: 25px;
+  bottom: 25px;
+  width: 100%;
+  height: 100%;
+}
+
+.state-hidden {
+  visibility: hidden;
+  pointer-events: none;
 }

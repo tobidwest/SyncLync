@@ -29,16 +29,16 @@ var stateUtitls = {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           //Device is already authenticated, display links
-          document.getElementById("state-login").style.display = "none";
-          document.getElementById("state-linklist").style.display = "block";
+          document.getElementById("state-login").classList.add("state-hidden");
+          document.getElementById("state-linklist").classList.remove("state-hidden");
           linkUtils.fetchCollectionsAndRender();
         } else if (xhr.status === 401) {
           //Device is not authenticated, display login
           console.log(
             "The 401 erorr you see in the console is intended. You are not logged in, starting device auth..."
           );
-          document.getElementById("state-linklist").style.display = "none";
-          document.getElementById("state-login").style.display = "block";
+          document.getElementById("state-linklist").classList.add("state-hidden");
+          document.getElementById("state-login").classList.remove("state-hidden");
           loginUtils.startDeviceAuth();
         }
       }
@@ -48,8 +48,8 @@ var stateUtitls = {
 
   //hide all elements when app area is hidden
   hideEverything: function () {
-    document.getElementById("state-login").style.display = "none";
-    document.getElementById("state-linklist").style.display = "none";
+    document.getElementById("state-login").classList.add("state-hidden");
+    document.getElementById("state-linklist").classList.add("state-hidden");
   },
 };
 

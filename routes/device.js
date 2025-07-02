@@ -25,13 +25,6 @@ router.post("/start", async (req, res) => {
 });
 
 // URL encoded in the QR code where the user confirms the device authorization
-router.get("/:userCode", async (req, res) => {
-  const device = await DeviceCode.findOne({ userCode: req.params.userCode });
-  if (!device || device.expiresAt < new Date()) {
-    return res.status(400).send("Code expired or invalid");
-  }
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-});
 
 // URL called after user confirms the device
 router.post("/confirm", async (req, res) => {
