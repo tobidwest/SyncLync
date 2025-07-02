@@ -30,15 +30,21 @@ var stateUtitls = {
         if (xhr.status === 200) {
           //Device is already authenticated, display links
           document.getElementById("state-login").classList.add("state-hidden");
-          document.getElementById("state-linklist").classList.remove("state-hidden");
+          document
+            .getElementById("state-linklist")
+            .classList.remove("state-hidden");
           linkUtils.fetchCollectionsAndRender();
         } else if (xhr.status === 401) {
           //Device is not authenticated, display login
           console.log(
             "The 401 erorr you see in the console is intended. You are not logged in, starting device auth..."
           );
-          document.getElementById("state-linklist").classList.add("state-hidden");
-          document.getElementById("state-login").classList.remove("state-hidden");
+          document
+            .getElementById("state-linklist")
+            .classList.add("state-hidden");
+          document
+            .getElementById("state-login")
+            .classList.remove("state-hidden");
           loginUtils.startDeviceAuth();
         }
       }
@@ -149,8 +155,8 @@ var loginUtils = {
 
 var linkUtils = {
   collections: [],
-  activeNavIndex: 0,         // aktuell ausgewählte Collection
-  currentFocusedCell: null,  // Fokus in der Links-Tabelle (TD)
+  activeNavIndex: 0, // aktuell ausgewählte Collection
+  currentFocusedCell: null, // Fokus in der Links-Tabelle (TD)
   currentFocusedNavLink: null, // Fokus in der Navi (A)
 
   // Fetch collections from API on page load
@@ -209,11 +215,10 @@ var linkUtils = {
     const navLinks = document.querySelectorAll("#nav-links .nav-link");
     navLinks.forEach((link, idx) => {
       link.style.backgroundColor = idx === activeIdx ? "#2e3c47" : "";
-      link.style.borderLeft = idx === activeIdx ? "5px solid #921a36" : "5px solid #1d2a38";
+      link.style.borderLeft =
+        idx === activeIdx ? "5px solid #921a36" : "5px solid #1d2a38";
     });
   },
-
-
 
   // Render the links as grid-items in a table
   renderLinksTable: function (links) {
@@ -254,7 +259,6 @@ var linkUtils = {
                 <img src="${link.icon}" alt="${link.name}" />
                 <span>${link.name}</span>
               `;
-
         } else {
           td.innerHTML = "";
           td.style.background = "transparent";
@@ -265,6 +269,12 @@ var linkUtils = {
       }
       table.appendChild(tr);
     }
+
+    // Add space for snap scrolling
+    const spacerDiv = document.createElement("div");
+    spacerDiv.style.height = "100vh";
+    spacerDiv.style.flexShrink = "0";
+    table.appendChild(spacerDiv);
 
     // erste Zelle fokussieren
     const firstCell = table.querySelector(".grid-item[tabindex='0']"); // <-- neu hinzugefügt //TODO: Was tun, wenn keine Links vorhanden in Collection?
@@ -303,7 +313,8 @@ var linkUtils = {
     }
   },
 
-  activateLink: function (el) { // <-- neu
+  activateLink: function (el) {
+    // <-- neu
     const linkId = el.dataset.linkId;
     const linkUrl = el.dataset.linkUrl;
 
@@ -320,8 +331,5 @@ var linkUtils = {
     } else if (linkUrl) {
       window.open(linkUrl, "_blank");
     }
-  }
-
-
-  
+  },
 };

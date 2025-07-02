@@ -184,7 +184,6 @@ div#app_area {
 #state-linklist .grid-table {
   width: 100%;
   border-spacing: 20px;
-  margin-top: 60px;
 }
 
 #state-linklist .grid-table tr,
@@ -194,7 +193,7 @@ div#app_area {
 
 #state-linklist .grid-item {
   width: 30%;
-  height: 180px;
+  height: 160px;
   background-color: #2e3c47;
   border: 5px solid #2e3c47;
   text-align: center;
