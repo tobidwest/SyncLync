@@ -167,6 +167,7 @@ div#app_area {
 
 #state-linklist .main {
   overflow-y: auto;
+  scroll-snap-type: y mandatory;
   height: 610px;
   max-height: 100%;
   display: block;
@@ -174,6 +175,7 @@ div#app_area {
 
 #state-linklist .sidebar .nav-links {
   overflow-y: auto;
+  scroll-snap-type: y mandatory;
   height: 530px;
   max-height: 100%;
   display: block;
@@ -185,7 +187,8 @@ div#app_area {
   margin-top: 60px;
 }
 
-#state-linklist .grid-table tr {
+#state-linklist .grid-table tr,
+#state-linklist .nav-link {
   scroll-snap-align: start;
 }
 
