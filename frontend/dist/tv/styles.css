@@ -170,7 +170,7 @@ div#app_area {
   overflow-y: auto;
   height: 610px;
   max-height: 100%;
-  display: block;
+  display: block;
 }
 
 #state-linklist .grid-table {
