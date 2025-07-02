@@ -165,10 +165,16 @@ div#app_area {
   box-sizing: border-box;
 }
 
-#state-linklist .main,
-#state-linklist .sidebar .nav-links {
+#state-linklist .main {
   overflow-y: auto;
   height: 610px;
+  max-height: 100%;
+  display: block;
+}
+
+#state-linklist .sidebar .nav-links {
+  overflow-y: auto;
+  height: 530px;
   max-height: 100%;
   display: block;
 }
