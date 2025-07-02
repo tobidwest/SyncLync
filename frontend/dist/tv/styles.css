@@ -160,16 +160,17 @@ div#app_area {
 
 #state-linklist .main {
   float: left;
-  width: 70%;
-  height: 580px;
+  width: 65%;
   padding: 20px;
   box-sizing: border-box;
 }
 
-#state-linklist .main {
+#state-linklist .main,
+#state-linklist .sidebar .nav-links {
   overflow-y: auto;
+  height: 610px;
   max-height: 100%;
-  display: block;
+  display: block;
 }
 
 #state-linklist .grid-table {
@@ -223,11 +224,12 @@ div#app_area {
 
 .state-container {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 25px;
+  left: 25px;
+  right: 25px;
+  bottom: 25px;
   width: 100%;
   height: 100%;
-  margin: 10px;
 }
 
 .state-hidden {
