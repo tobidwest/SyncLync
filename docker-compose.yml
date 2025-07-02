@@ -3,7 +3,7 @@
 services:
   app:
     build: .
-    container_name: synclynk-app
+    container_name: synclync-app
     ports:
       - "8080:80"
     env_file: .env
@@ -12,7 +12,7 @@ services:
 
   mongo:
     image: mongo:6
-    container_name: synclynk-mongo
+    container_name: synclync-mongo
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: "${DB_USERNAME}"

@@ -6,85 +6,45 @@
       http-equiv="Content-Type"
       content="application/vnd.hbbtv.xhtml+xml; utf-8"
     />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script type="text/javascript" src="scripts.js"></script>
     <script type="text/javascript" src="rc-buttons.js"></script>
-    <style type="text/css">
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        background: transparent;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        font-family: Open Sans, sans-serif;
-      }
-      object#applicationManager {
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        width: 0px;
-        height: 0px;
-      }
-      #prompt {
-        position: fixed;
-        right: 32px;
-        bottom: 32px;
-        background: rgba(30, 30, 30, 0.85);
-        color: #fff;
-        padding: 16px 24px;
-        border-radius: 12px;
-        font-size: 1.1em;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        display: none;
-        align-items: center;
-        gap: 10px;
-        z-index: 1000;
-      }
-      .red-dot {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        background: #e53935;
-        border-radius: 50%;
-        margin-right: 8px;
-        vertical-align: middle;
-        border: 2px solid #fff;
-      }
-    </style>
+    <script type="text/javascript" src="rc-interaction.js"></script>
   </head>
-  <body>
+
+  <body onload="start();">
     <div>
       <object
         type="application/oipfApplicationManager"
         id="applicationManager"
       ></object>
     </div>
-    <div id="prompt">
+    <div class="safe_area" id="app_area">
+      <div id="state-login" style="display: none">
+        <img src="rsc/logo.png" alt="SyncLync Logo" id="login-logo" />
+        <div id="login-container">
+          <h1>Link your account</h1>
+          <p>Scan this QR code with your phone to continue.</p>
+          <div id="login-qr-box">
+            <!-- QR code will be rendered here by JavaScript -->
+          </div>
+          <div class="footer">&copy; 2025 TU Berlin</div>
+        </div>
+      </div>
+      <div id="state-linklist" style="display: none">
+        <div class="sidebar">
+          <img src="rsc/logo.png" alt="SyncLync Logo" class="logo" />
+          <div class="nav-links" id="nav-links"></div>
+        </div>
+        <div class="main">
+          <table class="grid-table" id="links-table"></table>
+        </div>
+      </div>
+    </div>
+    <div id="red_button_notification_field">
       <span class="red-dot"></span>
       Press red button to access SyncLync.
     </div>
-    <script>
-      function start() {
-        try {
-          var appManager = document.getElementById("applicationManager");
-          var appObject = appManager.getOwnerApplication(document);
-        } catch (e) {}
-      }
-
-      setTimeout(() => {
-        const prompt = document.getElementById("prompt");
-        prompt.style.visability = "visible";
-        setTimeout(() => {
-          prompt.style.visability = "hidden";
-        }, 5000);
-      }, 1000);
-
-      // Button navigation
-      document.addEventListener("keydown", function (event) {
-        if (event.keyCode === 403 || event.key === "r") {
-          window.location.href = "login.html";
-        }
-      });
-    </script>
   </body>
 </html>

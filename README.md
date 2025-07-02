@@ -1,7 +1,9 @@
 # 🔗 SyncLync
+
 SyncLync lets you curate and share collections of links, then display them on any HbbTV‑enabled television.
 
 ## ✨ Features
+
 - 📂 Organize bookmarks into collections
 - 🔗 Add or edit links with automatic favicon fetching
 - 🤝 Share collections using a join code
@@ -10,9 +12,12 @@ SyncLync lets you curate and share collections of links, then display them on an
 - 🔒 Manage your account (update email, change password, delete account)
 
 ## 🚀 Setup
-1. run docker compose up -d 
-2. use application at localhost:8080
-3. TV frontend at localhost:8080/tv/single-page-application/
+
+1. copy .env.sample to .env and change its contents
+2. run docker compose up -d
+3. use application at localhost:8080
+4. TV frontend at localhost:8080/tv/
 
 ## 💪 Contributing
+
 Contributions are welcome! See open issues and for ideas.
