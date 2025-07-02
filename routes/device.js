@@ -19,7 +19,7 @@ router.post("/start", async (req, res) => {
   res.json({
     device_code: deviceCode,
     user_code: userCode,
-    verification_uri: `${BASE_URL}/device/${userCode}`,
+    verification_uri: `${BASE_URL}:8080/confirmDevice/${userCode}`,
     expires_in: 600,
   });
 });
