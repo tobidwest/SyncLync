@@ -2,6 +2,8 @@
 
 SyncLync lets you curate and share collections of links, then display them on any HbbTV‑enabled television.
 
+![image](https://github.com/user-attachments/assets/04ed69f9-3252-4aff-bf38-fe45cd16b478)![image](https://github.com/user-attachments/assets/7eb12afd-0b48-4fb0-a1a6-41c428665712)
+
 ## ✨ Features
 
 - 📂 Organize bookmarks into collections
