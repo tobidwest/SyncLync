@@ -324,12 +324,12 @@ var linkUtils = {
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-          window.open(linkUrl, "_blank");
+          window.open(linkUrl);
         }
       };
       xhr.send(JSON.stringify({}));
     } else if (linkUrl) {
-      window.open(linkUrl, "_blank");
+      window.open(linkUrl);
     }
   },
 };
