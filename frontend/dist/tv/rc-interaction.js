@@ -134,7 +134,7 @@ function handleKeyCode(kc) {
     switch (kc) {
       case VK_RED:
         // red button shows & hides the app scene
-        console.log("red")//TODO REMOVE
+        console.log("red"); //TODO REMOVE
         if (scene.isAppAreaVisible) {
           scene.hideAppArea();
 
@@ -150,17 +150,14 @@ function handleKeyCode(kc) {
         // REMOVE no need to rerender complete scene
         // shouldRender = false;
         break;
+      case VK_GREEN:
+        // TODO – LOGOUT IMPLEMENTIEREN
+        // wenn eingeloggt und App aktiv (also nicht im Hintergrund):
+        //    logout über api auslösen (damit cookies gelöscht werden)
+        //    state auf login wechseln
+        // sonst: nichts tun
+        break;
       // REMOVE
-      // case VK_GREEN:
-      //   // green button toggles playback buttons
-      //   if (scene.shouldReactToPlaybackButtons) {
-      //     scene.shouldReactToPlaybackButtons = false;
-      //   } else {
-      //     scene.shouldReactToPlaybackButtons = true;
-      //     scene.lastPlaybackButtonPressed = null;
-      //   }
-      //   rcUtils.setKeyset(scene.theAppObject, scene.getRelevantButtonsMask());
-      //   break;
       // case VK_YELLOW:
       //   // yellow button toggles numeric buttons
       //   if (scene.shouldReactToNumericButtons) {
@@ -184,13 +181,16 @@ function handleKeyCode(kc) {
         if (linkUtils.currentFocusedCell) {
           const currentCell = linkUtils.currentFocusedCell;
           const currentRow = currentCell.parentElement;
-          const cellsInRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const cellsInRow = Array.from(
+            currentRow.querySelectorAll(".grid-item")
+          );
           const cellIndex = cellsInRow.indexOf(currentCell);
 
           if (cellIndex === 0) {
             // Fokus von Tabelle zu Navi springen (auf aktuell aktive Nav)
             const navLinks = document.querySelectorAll("#nav-links .nav-link");
-            const navLinkToFocus = navLinks[linkUtils.activeNavIndex] || navLinks[0];
+            const navLinkToFocus =
+              navLinks[linkUtils.activeNavIndex] || navLinks[0];
             if (navLinkToFocus) {
               linkUtils.focusNavLink(navLinkToFocus);
             }
@@ -216,7 +216,9 @@ function handleKeyCode(kc) {
         } else if (linkUtils.currentFocusedCell) {
           const currentCell = linkUtils.currentFocusedCell;
           const currentRow = currentCell.parentElement;
-          const cellsInRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const cellsInRow = Array.from(
+            currentRow.querySelectorAll(".grid-item")
+          );
           const cellIndex = cellsInRow.indexOf(currentCell);
 
           let targetCell;
@@ -234,11 +236,12 @@ function handleKeyCode(kc) {
         }
         break;
 
-
       case VK_DOWN:
         if (linkUtils.currentFocusedNavLink) {
           // Fokus in Navi: eine Collection nach unten (wrap-around bleibt)
-          const navLinks = Array.from(document.querySelectorAll("#nav-links .nav-link"));
+          const navLinks = Array.from(
+            document.querySelectorAll("#nav-links .nav-link")
+          );
           let idx = navLinks.indexOf(linkUtils.currentFocusedNavLink);
           idx = (idx + 1) % navLinks.length;
           linkUtils.focusNavLink(navLinks[idx]);
@@ -247,7 +250,9 @@ function handleKeyCode(kc) {
           const table = currentCell.closest("table");
           const currentRow = currentCell.parentElement;
           const rows = Array.from(table.querySelectorAll("tr"));
-          const cellsInCurrentRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const cellsInCurrentRow = Array.from(
+            currentRow.querySelectorAll(".grid-item")
+          );
           const colIndex = cellsInCurrentRow.indexOf(currentCell);
 
           let rowIndex = rows.indexOf(currentRow);
@@ -257,9 +262,12 @@ function handleKeyCode(kc) {
             rowIndex = rowIndex + 1;
 
             const targetRow = rows[rowIndex];
-            const targetCells = Array.from(targetRow.querySelectorAll(".grid-item"));
+            const targetCells = Array.from(
+              targetRow.querySelectorAll(".grid-item")
+            );
 
-            const targetCell = targetCells[colIndex] || targetCells[targetCells.length - 1];
+            const targetCell =
+              targetCells[colIndex] || targetCells[targetCells.length - 1];
 
             if (targetCell.hasAttribute("data-link-url")) {
               linkUtils.focusCell(targetCell);
@@ -269,11 +277,12 @@ function handleKeyCode(kc) {
         }
         break;
 
-
       case VK_UP:
         if (linkUtils.currentFocusedNavLink) {
           // Fokus in Navi: eine Collection nach oben (wrap-around bleibt)
-          const navLinks = Array.from(document.querySelectorAll("#nav-links .nav-link"));
+          const navLinks = Array.from(
+            document.querySelectorAll("#nav-links .nav-link")
+          );
           let idx = navLinks.indexOf(linkUtils.currentFocusedNavLink);
           idx = (idx - 1 + navLinks.length) % navLinks.length;
           linkUtils.focusNavLink(navLinks[idx]);
@@ -282,7 +291,9 @@ function handleKeyCode(kc) {
           const table = currentCell.closest("table");
           const currentRow = currentCell.parentElement;
           const rows = Array.from(table.querySelectorAll("tr"));
-          const cellsInCurrentRow = Array.from(currentRow.querySelectorAll(".grid-item"));
+          const cellsInCurrentRow = Array.from(
+            currentRow.querySelectorAll(".grid-item")
+          );
           const colIndex = cellsInCurrentRow.indexOf(currentCell);
 
           let rowIndex = rows.indexOf(currentRow);
@@ -292,9 +303,12 @@ function handleKeyCode(kc) {
             rowIndex = rowIndex - 1;
 
             const targetRow = rows[rowIndex];
-            const targetCells = Array.from(targetRow.querySelectorAll(".grid-item"));
+            const targetCells = Array.from(
+              targetRow.querySelectorAll(".grid-item")
+            );
 
-            const targetCell = targetCells[colIndex] || targetCells[targetCells.length - 1];
+            const targetCell =
+              targetCells[colIndex] || targetCells[targetCells.length - 1];
 
             if (targetCell.hasAttribute("data-link-url")) {
               linkUtils.focusCell(targetCell);
@@ -303,7 +317,6 @@ function handleKeyCode(kc) {
           // sonst Fokus bleibt auf currentCell (keine Aktion)
         }
         break;
-
 
       case VK_ENTER:
         if (linkUtils.currentFocusedNavLink) {
@@ -321,9 +334,8 @@ function handleKeyCode(kc) {
         }
         break;
 
-
-        //activateFocusedItem();
-       // break;
+      //activateFocusedItem();
+      // break;
       //  REMOVE
       // case VK_BACK:
       //   // BACK button
