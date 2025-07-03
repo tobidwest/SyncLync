@@ -156,7 +156,45 @@ function handleKeyCode(kc) {
         //    logout über api auslösen (damit cookies gelöscht werden)
         //    state auf login wechseln
         // sonst: nichts tun
+
+        if (scene.isAppAreaVisible) {
+          //check whether user is logged in
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", "/api/collections", true);
+
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+              if (xhr.status === 200) {
+                // logout
+                const logoutXhr = new XMLHttpRequest();
+                logoutXhr.open("POST", "/auth/logout", true);
+                logoutXhr.onreadystatechange = function () {
+                  if (logoutXhr.readyState === 4) {
+                    if (logoutXhr.status === 200) {
+                      // change to login-screen
+                      document.getElementById("state-linklist").classList.add("state-hidden");
+                      document.getElementById("state-login").classList.remove("state-hidden");
+                      loginUtils.startDeviceAuth();
+                    } else {
+                      console.error("Logout failed with status: " + logoutXhr.status);
+                    }
+                  }
+                };
+                logoutXhr.send();  
+              } else {
+                //do nothing
+                console.log("user is not logged in, cannot logout")
+              }
+            }
+          };
+          xhr.send(); 
+        }
         break;
+
+
+
+
+
       // REMOVE
       // case VK_YELLOW:
       //   // yellow button toggles numeric buttons
