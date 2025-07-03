@@ -23,7 +23,7 @@ div.safe_area {
   width: 1024px;
   height: 648px;
   background-color: #0d1b2aee;
-  border-radius: 10px;
+  border-radius: 10px 0px;
   padding: 25px;
 }
 
@@ -116,7 +116,7 @@ div#app_area {
 #state-linklist .sidebar .logo {
   width: auto;
   height: 40px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 #state-linklist .sidebar {
@@ -177,7 +177,7 @@ div#app_area {
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   height: 460px;
-  margin-bottom: 60px;
+  margin-bottom: 50px;
   max-height: 100%;
   display: block;
 }
