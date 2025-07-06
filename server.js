@@ -68,10 +68,13 @@ app.use("/api", collectionRoutes);
 app.use("/api/account", accountRoutes);
 
 // Serve the frontend built files
-const distPath = path.join(__dirname, "frontend", "dist");
-app.use(express.static(distPath));
+const distPath = path.join(__dirname, "frontend", "computer", "dist");
+const tvPath = path.join(__dirname, "frontend", "tv");
 
-app.get("/{*splat}", (req, res) => {
+app.use("/", express.static(distPath));
+app.use("/tv", express.static(tvPath));
+
+app.get("*", (req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
