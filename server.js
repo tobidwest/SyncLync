@@ -74,7 +74,7 @@ const tvPath = path.join(__dirname, "frontend", "tv");
 app.use("/", express.static(distPath));
 app.use("/tv", express.static(tvPath));
 
-app.get("*", (req, res) => {
+app.get("/{*splat}", (req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 

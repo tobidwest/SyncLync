@@ -1,0 +1,17 @@
+{
+  "/api": {
+    "target": "http://localhost:80",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/auth": {
+    "target": "http://localhost:80",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/device": {
+    "target": "http://localhost:80",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

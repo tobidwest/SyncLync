@@ -1,24 +1,44 @@
-FROM node:20
-    
-    # Verzeichnisse anlegen
-    WORKDIR /app
-    
-    # Backend-Code kopieren
-    COPY package*.json ./
-    COPY auth/ ./auth/
-    COPY middlewares/ ./middlewares/
-    COPY models/ ./models/
-    COPY routes/ ./routes/
-    COPY server.js ./
+# ----------------------------
+# Stage 1: Build Angular app
+# ----------------------------
+    FROM node:20 AS angular-builder
 
+    WORKDIR /app/frontend/computer
     
-    # dist-Ordner aus dem Builder nehmen
-    COPY frontend/dist/ ./frontend/dist/
+   
+    COPY frontend/computer/package*.json ./
+    RUN npm ci
     
-    # Backend-Dependencies
-    RUN npm ci --omit=dev
+   
+    COPY frontend/computer ./
     
-    EXPOSE 80
-    ENV NODE_ENV=production
+   
+    RUN npm run build -- --configuration production
     
-    CMD ["node", "server.js"]
+# ----------------------------
+# Stage 2: API + static files
+# ----------------------------
+FROM node:20 AS api
+
+WORKDIR /app
+
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+
+COPY auth/ ./auth/
+COPY middlewares/ ./middlewares/
+COPY models/ ./models/
+COPY routes/ ./routes/
+COPY server.js ./
+
+
+COPY frontend/tv ./frontend/tv
+
+COPY --from=angular-builder /app/frontend/computer/dist/sync-link/browser ./frontend/computer/dist
+
+EXPOSE 80
+ENV NODE_ENV=production
+CMD ["node", "server.js"]
+    
