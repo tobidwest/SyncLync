@@ -1,4 +1,5 @@
 // Routes for modifying the currently authenticated user's account
+
 const express = require("express");
 const validator = require("validator");
 const User = require("../models/User");
@@ -57,7 +58,7 @@ router.delete("/", async (req, res) => {
     { $pull: { sharedWith: userId } }
   );
   // Remove user from shared collections and gather all links from their
-  // own collections so unused links can be deleted later
+  // own collections so unused links can be deleted lateron
   const ownedCollections = await Collection.find({ owner: userId });
   const allLinkIds = ownedCollections.reduce((acc, col) => {
     col.linkIds.forEach((id) => acc.add(id.toString()));
@@ -76,6 +77,7 @@ router.delete("/", async (req, res) => {
     res.sendStatus(204);
   });
 });
+
 // Get the current user's account information
 router.get("/", (req, res) => {
   const userInfo = {

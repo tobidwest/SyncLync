@@ -1,3 +1,5 @@
+// Database scheme for a device code for TV device authorization
+
 const mongoose = require("mongoose");
 
 const deviceCodeSchema = new mongoose.Schema({

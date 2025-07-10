@@ -1,4 +1,5 @@
 // Routes implementing the device authorization flow
+
 const express = require("express");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
@@ -23,8 +24,6 @@ router.post("/start", async (req, res) => {
     expires_in: 600,
   });
 });
-
-// URL encoded in the QR code where the user confirms the device authorization
 
 // URL called after user confirms the device
 router.post("/confirm", async (req, res) => {

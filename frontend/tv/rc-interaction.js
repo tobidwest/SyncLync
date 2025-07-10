@@ -1,4 +1,5 @@
 // scene implementation
+
 var scene = {
   theAppObject: null,
   appAreaDiv: null,
@@ -20,7 +21,6 @@ var scene = {
     rcUtils.registerKeyEventListener();
     // initial state is app_area hidden
     this.hideAppArea();
-    // REMOVE render the scene so it is ready to be shown
     // this.render();
   },
   getRelevantButtonsMask: function () {
@@ -57,84 +57,14 @@ var scene = {
     // when hidden, app reacts only to red button key press (show app scene)
     rcUtils.setKeyset(this.theAppObject, rcUtils.MASK_CONSTANT_RED);
   },
-  // REMOVE
-  // render: function () {
-  //   var navigationField = document.getElementById("navigation_field");
-  //   var playbackField = document.getElementById("playback_field");
-  //   var togglePlaybackField = document.getElementById("toggle_playback_field");
-  //   var numericField = document.getElementById("numeric_field");
-  //   var toggleNumericField = document.getElementById("toggle_numeric_field");
-  //   var preventField = document.getElementById("prevent_field");
-  //   // do navigation buttons
-  //   if (this.lastNavigationButtonPressed === null) {
-  //     navigationField.innerHTML =
-  //       "Please press one of the navigation buttons (arrows, OK/ENTER, back).";
-  //   } else {
-  //     navigationField.innerHTML = this.lastNavigationButtonPressed;
-  //   }
-  //   // do playback buttons
-  //   if (this.shouldReactToPlaybackButtons) {
-  //     if (this.lastPlaybackButtonPressed === null) {
-  //       playbackField.innerHTML =
-  //         "Please press one of the playback buttons (trick play controls).";
-  //     } else {
-  //       playbackField.innerHTML = this.lastPlaybackButtonPressed;
-  //     }
-  //     togglePlaybackField.innerHTML = "Disable playback buttons";
-  //   } else {
-  //     playbackField.innerHTML =
-  //       "Please press the green button to enable playback buttons.";
-  //     togglePlaybackField.innerHTML = "Enable playback buttons";
-  //   }
-  //   // do numeric buttons
-  //   if (this.shouldReactToNumericButtons) {
-  //     if (this.lastNumericButtonPressed === null) {
-  //       numericField.innerHTML =
-  //         "Please press one of the numeric buttons (0 ... 9).";
-  //     } else {
-  //       numericField.innerHTML = this.lastNumericButtonPressed;
-  //     }
-  //     toggleNumericField.innerHTML = "Disable numeric buttons";
-  //   } else {
-  //     numericField.innerHTML =
-  //       "Please press the yellow button to enable numeric buttons.";
-  //     toggleNumericField.innerHTML = "Enable numeric buttons";
-  //   }
-  //   // do prevent field
-  //   preventField.innerHTML =
-  //     "Please press the blue button to prevent the app from receiving button events for 10 seconds.";
-  // },
-  // timerTick: function () {
-  //   // check if timeout occured
-  //   if (scene.timeout > 0) {
-  //     // not yet, display message
-  //     var preventField = document.getElementById("prevent_field");
-  //     preventField.innerHTML =
-  //       "The app shall not receive RC button events for " +
-  //       scene.timeout +
-  //       " seconds.";
-  //     // decrement timeout and reschedule for 1 second
-  //     scene.timeout--;
-  //     setTimeout(scene.timerTick, 1000);
-  //   } else {
-  //     // timeout occured, start reacting to buttons again
-  //     rcUtils.setKeyset(scene.theAppObject, scene.getRelevantButtonsMask());
-  //     // and rerender scene
-  //     scene.render();
-  //   }
-  // },
 };
 
 // RC button press handler function
 function handleKeyCode(kc) {
   try {
-    // REMOVE
-    // var shouldRender = true;
-    // process buttons
     switch (kc) {
       case VK_RED:
         // red button shows & hides the app scene
-        console.log("red"); //TODO REMOVE
         if (scene.isAppAreaVisible) {
           scene.hideAppArea();
 
@@ -146,17 +76,10 @@ function handleKeyCode(kc) {
             stateUtitls.displayCorrectState();
           }, 500); // wait for 500ms to ensure that UI change is completed
         }
-
-        // REMOVE no need to rerender complete scene
-        // shouldRender = false;
         break;
-      case VK_GREEN:
-        // TODO – LOGOUT IMPLEMENTIEREN
-        // wenn eingeloggt und App aktiv (also nicht im Hintergrund):
-        //    logout über api auslösen (damit cookies gelöscht werden)
-        //    state auf login wechseln
-        // sonst: nichts tun
 
+        // logout functionality
+      case VK_GREEN:
         if (scene.isAppAreaVisible) {
           //check whether user is logged in
           const xhr = new XMLHttpRequest();
@@ -191,30 +114,6 @@ function handleKeyCode(kc) {
         }
         break;
 
-
-
-
-
-      // REMOVE
-      // case VK_YELLOW:
-      //   // yellow button toggles numeric buttons
-      //   if (scene.shouldReactToNumericButtons) {
-      //     scene.shouldReactToNumericButtons = false;
-      //   } else {
-      //     scene.shouldReactToNumericButtons = true;
-      //     scene.lastNumericButtonPressed = null;
-      //   }
-      //   rcUtils.setKeyset(scene.theAppObject, scene.getRelevantButtonsMask());
-      //   break;
-      // case VK_BLUE:
-      //   // blue button prevents user input for 10 seconds
-      //   rcUtils.setKeyset(scene.theAppObject, 0); // this will prevent the app from receiving furher RC button events
-      //   scene.timeout = 10;
-      //   scene.timerTick();
-      //   // REMOVE no need to rerender complete scene
-      //   // shouldRender = false;
-      //   break;
-      // TODO change focus
       case VK_LEFT:
         if (linkUtils.currentFocusedCell) {
           const currentCell = linkUtils.currentFocusedCell;
@@ -352,106 +251,28 @@ function handleKeyCode(kc) {
               linkUtils.focusCell(targetCell);
             }
           }
-          // sonst Fokus bleibt auf currentCell (keine Aktion)
+          // otherwise focus remains on currentCell
         }
         break;
 
       case VK_ENTER:
         if (linkUtils.currentFocusedNavLink) {
-          // Aktiviere die Collection (wie z.B. bei Hover)
+          // activate the collection
           const idx = parseInt(linkUtils.currentFocusedNavLink.dataset.idx, 10);
           if (!isNaN(idx)) {
             linkUtils.setActiveNav(idx);
             linkUtils.renderLinksTable(linkUtils.collections[idx].links || []);
-            // Fokus bleibt auf Navi-Link (optional)
+            // focus remains on the collection
             linkUtils.focusNavLink(linkUtils.currentFocusedNavLink);
           }
         } else if (linkUtils.currentFocusedCell) {
-          // Link in Tabelle aktivieren (wie bisher)
+          // activate a link table cell
           linkUtils.activateLink(linkUtils.currentFocusedCell);
         }
         break;
 
-      //activateFocusedItem();
-      // break;
-      //  REMOVE
-      // case VK_BACK:
-      //   // BACK button
-      //   scene.lastNavigationButtonPressed = "BACK";
-      //   break;
-      // case VK_PLAY:
-      //   // PLAY button
-      //   scene.lastPlaybackButtonPressed = "PLAY";
-      //   break;
-      // case VK_PAUSE:
-      //   // PAUSE button
-      //   scene.lastPlaybackButtonPressed = "PAUSE";
-      //   break;
-      // case VK_PLAY_PAUSE:
-      //   // PLAY / PAUSE button
-      //   scene.lastPlaybackButtonPressed = "PLAY / PAUSE";
-      //   break;
-      // case VK_STOP:
-      //   // STOP button
-      //   scene.lastPlaybackButtonPressed = "STOP";
-      //   break;
-      // case VK_FAST_FWD:
-      //   // FFWD button
-      //   scene.lastPlaybackButtonPressed = "FFWD";
-      //   break;
-      // case VK_REWIND:
-      //   // RWD button
-      //   scene.lastPlaybackButtonPressed = "RWD";
-      //   break;
-      // case VK_0:
-      //   // 0 numeric button
-      //   scene.lastNumericButtonPressed = "0";
-      //   break;
-      // case VK_1:
-      //   // 1 numeric button
-      //   scene.lastNumericButtonPressed = "1";
-      //   break;
-      // case VK_2:
-      //   // 2 numeric button
-      //   scene.lastNumericButtonPressed = "2";
-      //   break;
-      // case VK_3:
-      //   // 3 numeric button
-      //   scene.lastNumericButtonPressed = "3";
-      //   break;
-      // case VK_4:
-      //   // 4 numeric button
-      //   scene.lastNumericButtonPressed = "4";
-      //   break;
-      // case VK_5:
-      //   // 5 numeric button
-      //   scene.lastNumericButtonPressed = "5";
-      //   break;
-      // case VK_6:
-      //   // 6 numeric button
-      //   scene.lastNumericButtonPressed = "6";
-      //   break;
-      // case VK_7:
-      //   // 7 numeric button
-      //   scene.lastNumericButtonPressed = "7";
-      //   break;
-      // case VK_8:
-      //   // 8 numeric button
-      //   scene.lastNumericButtonPressed = "8";
-      //   break;
-      // case VK_9:
-      //   // 9 numeric button
-      //   scene.lastNumericButtonPressed = "9";
-      //   break;
-      default:
-      // REMOVE pressed unhandled key
-      // shouldRender = false;
     }
-    // REMOVE
-    // if (shouldRender) {
-    //   // render scene
-    //   scene.render();
-    // }
+    /
   } catch (e) {
     // pressed unhandled key, catch the error
   }
@@ -462,19 +283,19 @@ function handleKeyCode(kc) {
 // app entry function
 function start() {
   try {
-    // attempt to acquire the Application object
+    // attempt to acquire the application object
     var appManager = document.getElementById("applicationManager");
     var appObject = appManager.getOwnerApplication(document);
-    // check if Application object was a success
+    // check if application object was a success
     if (appObject === null) {
-      // error acquiring the Application object!
+      // error acquiring the application objecto
     } else {
       // we have the Application object, and we can initialize the scene and show our app
       scene.initialize(appObject);
       appObject.show();
     }
   } catch (e) {
-    // this is not an HbbTV client, catch the error.
+    // this is not an HbbTV client, catch the error
   }
 
   // show the red button prompt

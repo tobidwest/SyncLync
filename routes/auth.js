@@ -1,9 +1,9 @@
 // User authentication routes (register, login, logout)
+
 const express = require("express");
 const validator = require("validator");
 const passport = require("passport");
 const User = require("../models/User");
-
 
 const router = express.Router();
 

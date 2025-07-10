@@ -1,4 +1,5 @@
-// CRUD operations for collections of links
+// CRUD operations for collections
+
 const express = require("express");
 const mongoose = require("mongoose");
 const validator = require("validator");
@@ -7,14 +8,13 @@ const Link = require("../models/Link");
 
 const router = express.Router();
 
-// Get all collections for the current user
-// This endpoint returns all collections the user owns or is shared with
+// Retrieve all collections owned by the user or shared with them
 router.get("/collections", async (req, res) => {
   const collections = await Collection.find({
     $or: [{ owner: req.user._id }, { sharedWith: req.user._id }],
   }).populate("linkIds");
   const result = collections.map((col) => {
-    // Sort links based on user sorting preference
+    // Sort links based on user's sorting preference
     let sortedLinks = [...col.linkIds];
     const sortPref = req.user.sorting || "counter";
     if (sortPref === "alphabetically") {
@@ -174,7 +174,7 @@ router.post("/collections/:collectionId/links/:linkId", async (req, res) => {
   });
 });
 
-// Helper to fetch a Google-hosted favicon for a URL
+// Helper function to fetch a Google-hosted favicon for a URL
 const getFaviconUrl = (url) => {
   try {
     const { hostname } = new URL(url);
@@ -204,7 +204,7 @@ router.post("/collections/:collectionId/links", async (req, res) => {
   if (!validator.isURL(url, { require_protocol: true })) {
     return res.status(400).json({ error: "Invalid URL" });
   }
-  // Check if link already exists in this collection
+  // Check if that link already exists in the collection
   const existingLink = await Link.findOne({ url, name });
   if (existingLink && collection.linkIds.includes(existingLink._id)) {
     return res
@@ -277,7 +277,6 @@ router.put("/links/:linkId", async (req, res) => {
   if (!existingLink) {
     return res.status(404).json({ error: "Link not found" });
   }
-
   // Check if user is owner or member of at least one collection containing this link
   const hasAccess = await Collection.exists({
     linkIds: req.params.linkId,
@@ -299,7 +298,7 @@ router.put("/links/:linkId", async (req, res) => {
   res.json(link);
 });
 
-// Increase click counter and update last accessed time
+// Increase click counter and update time of last access
 router.post("/links/:linkId/click", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.linkId)) {
     return res.status(400).json({ error: "Invalid link id" });

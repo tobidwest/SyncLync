@@ -1,3 +1,5 @@
+// Database scheme for user accounts
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
@@ -11,6 +13,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// Functions for password hashing and salting
 userSchema.methods.setPassword = async function (password) {
   this.password = await bcrypt.hash(password, 10);
 };

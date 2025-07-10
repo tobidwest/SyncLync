@@ -1,6 +1,4 @@
-//
-//  define RC button globals for terminal
-//
+//  define shortcuts for remote control keypress handling
 if (typeof KeyEvent !== "undefined") {
   if (typeof KeyEvent.VK_LEFT !== "undefined") {
     var VK_LEFT = KeyEvent.VK_LEFT;
@@ -43,9 +41,8 @@ if (typeof KeyEvent !== "undefined") {
     var VK_9 = KeyEvent.VK_9;
   }
 }
-//
-// if we failed, define RC button globals for browser emulator
-//
+
+// if unsuccessful, prepare for browser emulator
 if (typeof VK_LEFT === "undefined") {
   var VK_LEFT = 0x25;
   var VK_UP = 0x26;
@@ -86,9 +83,8 @@ if (typeof VK_0 === "undefined") {
   var VK_8 = 0x38;
   var VK_9 = 0x39;
 }
-//
-//  define utility functions for RC
-//
+
+//  define utility functions for keypress handling
 var rcUtils = {
   MASK_CONSTANT_RED: 0x1,
   MASK_CONSTANT_GREEN: 0x2,

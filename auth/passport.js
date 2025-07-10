@@ -1,3 +1,5 @@
+// This file configures Passport.js for authentication handling
+
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");

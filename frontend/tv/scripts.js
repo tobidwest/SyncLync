@@ -1,41 +1,20 @@
+// helper functions for changing the displayed state (logged in or out)
 var stateUtitls = {
   displayCorrectState: function () {
-    // what this function should to:
-    // - check if login is required
-    // - show state-login or state-linklist, both are hidden by default
-    // - use loginUtils.startDeviceAuth or fetchCollectionsAndRender.fetchCollectionsAndRender, depending on the state
-    // -----------------------
-    // - when this function should be called:
-    // - pollForAuth must be changed so it calls this function once the login has finished
-    // - this function must be called after red button press via scene.showAppArea and scene.hideAppArea in rc-interaction.js (X)
-    //   OR via a listener that checks it the app area visibility changes
-    // - the code below contains window.location.href in some places, especially when an error occurs. instead of refreshing,
-    //   the state should be set accordingly (and in some cases data may need to be refreshed, e.g. new authorization attempt –
-    //   this might still need to be implemented in this or a new function)
-
-    //TODO: What is meant by "(and in some cases data may need to be refreshed, e.g. new authorization attempt –
-    //   this might still need to be implemented in this or a new function)" ??
-
-    // -----------------------
-    // then (we can do this together after everything else works and after pc frontend is uploaded):
-    // - implement button navigation rc-interaction.js
-    // -----------------------
-    // thank you!!
-
-    //check whether device is authenticated
+    // check whether device is authenticated
     const xhr = new XMLHttpRequest();
     xhr.open("GET", "/api/collections", true);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          //Device is already authenticated, display links
+          // device is already authenticated, display links
           document.getElementById("state-login").classList.add("state-hidden");
           document
             .getElementById("state-linklist")
             .classList.remove("state-hidden");
           linkUtils.fetchCollectionsAndRender();
         } else if (xhr.status === 401) {
-          //Device is not authenticated, display login
+          // device is not authenticated, display login
           console.log(
             "The 401 erorr you see in the console is intended. You are not logged in, starting device auth..."
           );
@@ -52,13 +31,14 @@ var stateUtitls = {
     xhr.send();
   },
 
-  //hide all elements when app area is hidden
+  // hide all elements when the app area is hidden
   hideEverything: function () {
     document.getElementById("state-login").classList.add("state-hidden");
     document.getElementById("state-linklist").classList.add("state-hidden");
   },
 };
 
+// helper functions for login handling
 var loginUtils = {
   deviceCode: null,
 
@@ -72,12 +52,12 @@ var loginUtils = {
 
         var qrBox = document.getElementById("login-qr-box");
 
-        // remove existing, previously generated QR-codes
+        // remove existing, previously generated QR codes
         while (qrBox.firstChild) {
           qrBox.removeChild(qrBox.firstChild);
         }
 
-        // generate new QR-Code
+        // generate new QR code
         new QRCode(qrBox, {
           text: data.verification_uri,
           width: 200,
@@ -86,10 +66,10 @@ var loginUtils = {
           colorLight: "#ffffff",
         });
 
-        // Show device code in console for debugging
+        // show device code in console for debugging
         console.log("Device code:", data.verification_uri);
 
-        // Make sure the generated QR code fills the box
+        // make sure the generated QR code fills the box
         var qrImg = document.querySelector("#qr-box img");
         if (qrImg) {
           qrImg.style.width = "100%";
@@ -97,7 +77,7 @@ var loginUtils = {
           qrImg.style.display = "block";
         }
 
-        // Show login container and logo
+        // show login container and logo
         document.getElementById("login-logo").style.opacity = "1";
         document.getElementById("login-container").style.opacity = "1";
 
@@ -114,13 +94,13 @@ var loginUtils = {
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          // Authenticated!
+          // authenticated
           stateUtitls.displayCorrectState();
         } else if (xhr.status === 202) {
-          // Authorization pending, poll again after delay
+          // authorization pending, poll again after delay
           setTimeout(loginUtils.pollForAuth, 2000);
         } else {
-          // Error (expired, invalid, etc)
+          // error (expired, invalid, etc)
           document.getElementById("login-container").innerHTML =
             "<h1>Something went wrong</h1><p>Please press the red button twice to try again.</p>";
         }
@@ -132,34 +112,16 @@ var loginUtils = {
       setTimeout(loginUtils.pollForAuth, 2000);
     }
   },
-
-  //TODO: Delete this function ?
-  checkLoginStatus: function () {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", "/api/collections", true);
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          window.location.href = "app.html";
-        } else if (xhr.status === 401) {
-          console.log(
-            "The 401 erorr you see in the console is intended. You are not logged in, starting device auth..."
-          );
-          startDeviceAuth();
-        }
-      }
-    };
-    xhr.send();
-  },
 };
 
+// helper functions for displaying links and collections
 var linkUtils = {
   collections: [],
-  activeNavIndex: 0, // aktuell ausgewählte Collection
-  currentFocusedCell: null, // Fokus in der Links-Tabelle (TD)
-  currentFocusedNavLink: null, // Fokus in der Navi (A)
+  activeNavIndex: 0, // currently selected collection
+  currentFocusedCell: null, // focus on link table
+  currentFocusedNavLink: null, // focus on collections
 
-  // Fetch collections from API on page load
+  // fetch collections from API on page load
   fetchCollectionsAndRender: function () {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", "/api/collections", true);
@@ -177,11 +139,9 @@ var linkUtils = {
                 "<tr><td>No collections found.</td></tr>";
             }
           } catch (e) {
-            //window.location.href = "login.html";
             stateUtitls.displayCorrectState();
           }
         } else {
-          //window.location.href = "login.html";
           stateUtitls.displayCorrectState();
         }
       }
@@ -209,7 +169,7 @@ var linkUtils = {
     });
   },
 
-  // Highlight the active nav-link
+  // highlight the active nav-link
   setActiveNav: function (activeIdx) {
     linkUtils.activeNavIndex = activeIdx;
     const navLinks = document.querySelectorAll("#nav-links .nav-link");
@@ -220,7 +180,7 @@ var linkUtils = {
     });
   },
 
-  // Render the links as grid-items in a table
+  // render the links as grid-items in a table
   renderLinksTable: function (links) {
     const table = document.getElementById("links-table");
     table.innerHTML = "";
@@ -235,25 +195,11 @@ var linkUtils = {
         if (link) {
           td.tabIndex = 0; //
           td.style.cursor = "pointer";
-          td.dataset.linkUrl = link.url; // <-- neu hinzugefügt
-          td.dataset.linkId = link._id || ""; // <-- neu hinzugefügt
-          /*td.onclick = () => {
-            if (link._id) {
-              const xhr = new XMLHttpRequest();
-              xhr.open("POST", `/api/links/${link._id}/click`, true);
-              xhr.setRequestHeader("Content-Type", "application/json");
-              xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                  window.open(link.url, "_blank");
-                }
-              };
-              xhr.send(JSON.stringify({}));
-            } else {
-              window.open(link.url, "_blank");
-            }
-          };*/
+          td.dataset.linkUrl = link.url;
+          td.dataset.linkId = link._id || "";
+
           td.onclick = function () {
-            linkUtils.activateLink(td); // <-- geändert
+            linkUtils.activateLink(td);
           };
           td.innerHTML = `
                 <img src="${link.icon}" alt="${link.name}" />
@@ -270,16 +216,16 @@ var linkUtils = {
       table.appendChild(tr);
     }
 
-    // Add space for snap scrolling
+    // add space for snap scrolling
     const spacerDiv = document.createElement("div");
     spacerDiv.style.height = "100vh";
     spacerDiv.style.flexShrink = "0";
     table.appendChild(spacerDiv);
 
-    // erste Zelle fokussieren
-    const firstCell = table.querySelector(".grid-item[tabindex='0']"); // <-- neu hinzugefügt //TODO: Was tun, wenn keine Links vorhanden in Collection?
+    // put focus on first cell
+    const firstCell = table.querySelector(".grid-item[tabindex='0']");
     if (firstCell) {
-      linkUtils.focusCell(firstCell); // <-- neu hinzugefügt
+      linkUtils.focusCell(firstCell);
     }
   },
 
@@ -291,7 +237,7 @@ var linkUtils = {
     navLink.classList.add("focused-nav");
     linkUtils.currentFocusedNavLink = navLink;
 
-    // Fokus in Tabelle aufheben
+    // undo focus of link table
     if (linkUtils.currentFocusedCell) {
       linkUtils.currentFocusedCell.classList.remove("focused");
       linkUtils.currentFocusedCell = null;
@@ -306,7 +252,7 @@ var linkUtils = {
     cell.classList.add("focused");
     linkUtils.currentFocusedCell = cell;
 
-    // Fokus in Navi aufheben
+    // undo focus of collections
     if (linkUtils.currentFocusedNavLink) {
       linkUtils.currentFocusedNavLink.classList.remove("focused-nav");
       linkUtils.currentFocusedNavLink = null;
@@ -314,7 +260,6 @@ var linkUtils = {
   },
 
   activateLink: function (el) {
-    // <-- neu
     const linkId = el.dataset.linkId;
     const linkUrl = el.dataset.linkUrl;
 

@@ -1,3 +1,5 @@
+// Database scheeme for a link
+
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
@@ -24,7 +26,7 @@ const linkSchema = new Schema(
     },
   },
   {
-    timestamps: true, // adds createdAt and updatedAt, might be useful for additional features
+    timestamps: true,
   }
 );
 
