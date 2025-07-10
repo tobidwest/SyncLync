@@ -3,8 +3,10 @@ import {
   Component,
   ComponentRef,
   ElementRef,
+  EventEmitter,
   Host,
   inject,
+  Output,
   ViewChild,
 } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
@@ -41,7 +43,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
     NgFor,
   ],
   template: `
-    <div class="flex flex-col w-full h-full">
+    <div class="flex flex-col w-full h-full bg-[#0E1923]">
       <!-- Logo -->
       <div class="flex shrink-0 items-center pt-4">
         <img class="h-18 w-auto m-auto" src="logo.png" alt="Your Company" />
@@ -76,7 +78,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                       (keydown.escape)="cancelAddCollection()"
                     />
                     <svg
-                      class="w-4 h-4 cursor-pointer text-green-400"
+                      class="w-6 h-6 cursor-pointer text-green-400"
                       (click)="addCollection()"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
@@ -90,7 +92,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                       />
                     </svg>
                     <svg
-                      class="w-4 h-4 cursor-pointer text-red-400 pl-2"
+                      class="w-8 h-8 cursor-pointer text-red-400 pl-2"
                       (click)="cancelAddCollection()"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
@@ -114,6 +116,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                cursor-pointer"
                     [routerLink]="['/collection', col._id]"
                     routerLinkActive="bg-surface border-l-4 border-primary"
+                    (click)="closeSidebar.emit()"
                   >
                     {{ col.name }}
                     <svg
@@ -125,6 +128,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                       viewBox="0 0 16 24"
                       fill="currentColor"
                       aria-hidden="true"
+                      (click)="$event.stopPropagation()"
                     >
                       <circle cx="8" cy="4" r="2" />
                       <circle cx="8" cy="12" r="2" />
@@ -242,6 +246,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
   `,
 })
 export class SideNavigationComponent {
+  @Output() closeSidebar = new EventEmitter<void>();
   private readonly router = inject(Router);
   private readonly overlay = inject(Overlay);
   readonly store = inject(CollectionStore);
@@ -273,7 +278,9 @@ export class SideNavigationComponent {
     // Immediately persist on change
     this.sortingControl.valueChanges.subscribe((value) => {
       this.accountService.updateSortingPreference(value).subscribe({
-        next: () => console.log('Sorting updated:', value),
+        next: () => {
+          console.log('Sorting updated:', value), this.closeSidebar.emit();
+        },
         error: (err) =>
           console.error('Error while setting sorting preference', err),
       });
@@ -318,6 +325,7 @@ export class SideNavigationComponent {
 
     this.store.addCollection(name); // 🚀 delegate to store
     this.resetAddForm();
+    this.closeSidebar.emit();
   }
 
   private resetAddForm(): void {
@@ -333,6 +341,7 @@ export class SideNavigationComponent {
   openShareModal(col: Collection) {
     const ref = this.openModal(ShareCollectionModalComponent);
     ref.instance.collection = { _id: col._id, shareId: col.shareId };
+    this.closeSidebar.emit();
   }
 
   openEditModal(col: Collection) {
@@ -342,6 +351,7 @@ export class SideNavigationComponent {
     ref.instance.updatedName.subscribe((name: string) => {
       this.store.updateCollectionName(col._id, name);
       ref.destroy();
+      this.closeSidebar.emit();
     });
   }
 
@@ -355,6 +365,7 @@ export class SideNavigationComponent {
         this.store.deleteCollection(col._id);
       }
       ref.destroy();
+      this.closeSidebar.emit();
     });
   }
 
@@ -366,6 +377,7 @@ export class SideNavigationComponent {
       this.store.leaveCollection(col._id);
       this.store.loadAll();
       ref.destroy();
+      this.closeSidebar.emit();
     });
   }
 

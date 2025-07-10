@@ -25,8 +25,10 @@ import { AuthService } from '../../../shared/services/auth.service';
         </h2>
       </div>
 
-      <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-        <div class="bg-surface px-6 py-12 shadow sm:rounded-lg sm:px-12">
+      <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px] px-8 rounded-xl">
+        <div
+          class="bg-surface px-6 py-12 shadow sm:rounded-lg sm:px-12 rounded-xl"
+        >
           <form class="space-y-6" [formGroup]="form" (submit)="onSubmit()">
             <div>
               <label for="email" class="block text-sm font-medium text-white"

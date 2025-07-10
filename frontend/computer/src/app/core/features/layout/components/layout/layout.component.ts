@@ -11,11 +11,46 @@ import { CollectionStore } from '../../../shared/services/collection-store.servi
   template: `
     <div class="flex w-full h-full relative">
       @if(loggedIn) {
-      <div
-        class="fixed inset-y-0 left-0 z-40 w-96 bg-[#0E1923] shadow-lg transform transition-transform duration-300 lg:relative lg:translate-x-0"
+      <!-- Mobile Burger Button -->
+      <button
+        class="lg:hidden absolute top-4 left-4 z-50 text-white"
+        (click)="toggleSidebar()"
       >
-        <app-side-navigation></app-side-navigation>
+        <!-- Heroicons Outline Menu Icon -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-8 w-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+
+      <!-- Backdrop when sidebar is open (mobile only) -->
+      <div
+        class="fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity hehe"
+        *ngIf="showSidebar"
+        (click)="closeSidebar()"
+      ></div>
+
+      <!-- Sidebar -->
+      <div
+        class="fixed inset-y-0 left-0 z-40 w-3/4 max-w-sm bg-[#0E1923] shadow-lg transform transition-transform duration-300
+             lg:relative lg:translate-x-0 lg:w-96"
+        [class.-translate-x-full]="!showSidebar"
+        [class.translate-x-0]="showSidebar"
+      >
+        <app-side-navigation (closeSidebar)="closeSidebar()" />
       </div>
+
+      <!-- Content -->
       <div class="flex-1 p-4 bg-[#0E1923] pt-8 h-full overflow-y-auto">
         <router-outlet></router-outlet>
       </div>
@@ -28,6 +63,7 @@ import { CollectionStore } from '../../../shared/services/collection-store.servi
 })
 export class LayoutComponent {
   loggedIn = false;
+  showSidebar = false;
 
   constructor(
     private auth: AuthService,
@@ -35,9 +71,7 @@ export class LayoutComponent {
   ) {}
 
   ngOnInit(): void {
-    // 1) Check session cookie
     this.auth.checkAuth().subscribe((ok) => {
-      console.log(ok);
       this.loggedIn = ok;
       if (ok) this.collections.loadAll();
     });
@@ -50,6 +84,14 @@ export class LayoutComponent {
 
   userLoggedOut(): void {
     this.loggedIn = false;
-    this.collections.clear(); // small helper method (see collection store)
+    this.collections.clear();
+  }
+
+  toggleSidebar(): void {
+    this.showSidebar = !this.showSidebar;
+  }
+
+  closeSidebar(): void {
+    this.showSidebar = false;
   }
 }
