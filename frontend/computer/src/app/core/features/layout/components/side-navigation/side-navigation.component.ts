@@ -48,7 +48,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
     <div class="flex flex-col w-full h-full bg-[#0E1923]">
       <!-- Logo -->
       <div class="flex shrink-0 items-center pt-4">
-        <img class="h-18 w-auto m-auto" src="logo.png" alt="Your Company" />
+        <img class="w-auto m-auto h-[50px]" src="logo.png" alt="Your Company" />
       </div>
 
       <!-- Scrollable content area -->
