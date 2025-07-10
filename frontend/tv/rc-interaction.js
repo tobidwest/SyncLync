@@ -78,7 +78,7 @@ function handleKeyCode(kc) {
         }
         break;
 
-        // logout functionality
+      // logout functionality
       case VK_GREEN:
         if (scene.isAppAreaVisible) {
           //check whether user is logged in
@@ -95,22 +95,28 @@ function handleKeyCode(kc) {
                   if (logoutXhr.readyState === 4) {
                     if (logoutXhr.status === 200) {
                       // change to login-screen
-                      document.getElementById("state-linklist").classList.add("state-hidden");
-                      document.getElementById("state-login").classList.remove("state-hidden");
+                      document
+                        .getElementById("state-linklist")
+                        .classList.add("state-hidden");
+                      document
+                        .getElementById("state-login")
+                        .classList.remove("state-hidden");
                       loginUtils.startDeviceAuth();
                     } else {
-                      console.error("Logout failed with status: " + logoutXhr.status);
+                      console.error(
+                        "Logout failed with status: " + logoutXhr.status
+                      );
                     }
                   }
                 };
-                logoutXhr.send();  
+                logoutXhr.send();
               } else {
                 //do nothing
-                console.log("user is not logged in, cannot logout")
+                console.log("user is not logged in, cannot logout");
               }
             }
           };
-          xhr.send(); 
+          xhr.send();
         }
         break;
 
@@ -270,9 +276,7 @@ function handleKeyCode(kc) {
           linkUtils.activateLink(linkUtils.currentFocusedCell);
         }
         break;
-
     }
-    /
   } catch (e) {
     // pressed unhandled key, catch the error
   }
