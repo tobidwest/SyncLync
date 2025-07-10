@@ -34,11 +34,12 @@ import { CollectionStore } from '../../../shared/services/collection-store.servi
       </button>
 
       <!-- Backdrop when sidebar is open (mobile only) -->
+      @if(showSidebar){
       <div
         class="fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity hehe"
-        *ngIf="showSidebar"
         (click)="closeSidebar()"
       ></div>
+      }
 
       <!-- Sidebar -->
       <div

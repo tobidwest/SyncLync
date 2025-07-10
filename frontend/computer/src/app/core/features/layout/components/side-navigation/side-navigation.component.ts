@@ -14,6 +14,7 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Overlay, OverlayConfig } from '@angular/cdk/overlay';
 import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { NgIf, NgFor } from '@angular/common';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { ShareCollectionModalComponent } from '../../../shared/modals/share-collection-modal/share-collection-modal.component';
 import { EditCollectionModalComponent } from '../../../shared/modals/edit-collection-modal/edit-collection-modal.component';
@@ -41,6 +42,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
     FormsModule,
     NgIf,
     NgFor,
+    NgSelectModule,
   ],
   template: `
     <div class="flex flex-col w-full h-full bg-[#0E1923]">
@@ -189,14 +191,22 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
 
       <div class="p-4 text-white">
         <label class="block mb-1 text-sm font-medium">Sorting</label>
-        <select
+
+        <ng-select
+          class="ng-background"
+          [formControl]="sortingControl"
+          [items]="sortingOptions"
+          [searchable]="true"
+          [clearable]="false"
+        ></ng-select>
+        <!-- <select
           class="w-full p-2 rounded bg-surface border border-gray-600 text-white"
           [formControl]="sortingControl"
         >
           <option *ngFor="let option of sortingOptions" [value]="option">
             {{ option }}
           </option>
-        </select>
+        </select> -->
       </div>
 
       <!-- Profile area -->

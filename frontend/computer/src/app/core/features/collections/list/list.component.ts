@@ -104,15 +104,15 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
             [src]="link.icon || 'https://placehold.co/96x96'"
             alt="favicon"
           />
-          <h3 class="mt-6 text-sm font-medium text-white">
+          <h3 class="mt-6 text-sm font-medium text-white truncate">
             {{ link.name }}
           </h3>
         </div>
 
         <!-- Menu trigger visible on hover -->
         <div
-          class="absolute top-2 right-3 text-white cursor-pointer opacity-0
-                   group-hover:opacity-100 transition-opacity"
+          class="absolute top-2 right-3 text-white cursor-pointer opacity-100
+                    transition-opacity"
           [cdkMenuTriggerFor]="linkMenu"
           cdkOverlayOrigin
           (click)="selectedLink = link"
