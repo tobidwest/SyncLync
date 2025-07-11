@@ -23,12 +23,13 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
   standalone: true,
   imports: [CdkMenuModule, FormsModule, ReactiveFormsModule],
   template: `
+    <!-- Display link grid only if a collection is selected -->
     @if(current()){
     <ul
       role="list"
       class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pt-12 px-8"
     >
-      <!-- + Add card -->
+      <!-- Card to show "Add Link" prompt -->
       @if(!showAddForm()){
       <li
         (click)="showAddForm.set(true)"
@@ -48,7 +49,7 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
       </li>
       }
 
-      <!-- Add form -->
+      <!-- Inline form for adding a new link -->
       @if(showAddForm()){
       <li
         class="col-span-1 flex flex-col justify-between rounded-lg bg-surface text-center
@@ -92,7 +93,7 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
       </li>
       }
 
-      <!-- Existing links -->
+      <!-- Render each link as a card -->
       @for(link of links(); track link._id) {
       <li
         class="group relative cursor-pointer col-span-1 flex flex-col rounded-lg
@@ -109,7 +110,7 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
           </h3>
         </div>
 
-        <!-- Menu trigger visible on hover -->
+        <!-- Context menu trigger (⋮ icon) -->
         <div
           class="absolute top-2 right-3 text-white cursor-pointer opacity-100
                     transition-opacity"
@@ -123,7 +124,6 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
             height="24"
             viewBox="0 0 16 24"
             fill="currentColor"
-            aria-hidden="true"
           >
             <circle cx="8" cy="4" r="2" />
             <circle cx="8" cy="12" r="2" />
@@ -133,7 +133,7 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
       </li>
       }
 
-      <!-- Context menu -->
+      <!-- CDK dropdown menu for link actions -->
       <ng-template #linkMenu cdkMenuPanel>
         <div
           cdkMenu
@@ -168,6 +168,7 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
       </ng-template>
     </ul>
     }@else {
+    <!-- Shown if no collection is selected -->
     <div class="h-full w-full flex justify-center items-center">
       <p class="text-white text-5xl">Please select a collection</p>
     </div>
@@ -175,21 +176,26 @@ import { RemoveLinkConfirmModalComponent } from '../../shared/modals/remove-link
   `,
 })
 export class ListComponent {
-  /* ---------- Dependency injection ---------- */
+  // --------- Dependencies ---------
   private readonly overlay = inject(Overlay);
   private readonly store = inject(CollectionStore);
 
-  /* ---------- Signals ---------- */
-  /** current collection links (reactive to store updates) */
+  // --------- Reactive state ---------
+  /** Returns currently selected collection's links */
   readonly links = computed(() => this.store.current()?.links ?? []);
+  /** Whether the current user is owner of the selected collection */
   readonly isOwner = computed(() => this.store.current()?.isOwner || false);
+  /** Currently active collection */
   readonly current = computed(() => this.store.current());
 
-  /** controls form visibility */
+  /** Controls whether add form is shown */
   readonly showAddForm = signal(false);
 
-  /* ---------- View state ---------- */
+  // --------- Form + Selection ---------
+  /** Form for adding a new link */
   readonly addForm: FormGroup;
+  /** Currently selected link (used in modals and context menu) */
+  selectedLink: Link | null = null;
 
   constructor(private fb: FormBuilder) {
     this.addForm = this.fb.group({
@@ -198,10 +204,9 @@ export class ListComponent {
     });
   }
 
-  selectedLink: Link | null = null;
+  // --------- Form Actions ---------
 
-  /* ---------- Actions ---------- */
-
+  /** Adds a new link to the current collection */
   addLink(): void {
     if (this.addForm.invalid) return;
 
@@ -214,15 +219,20 @@ export class ListComponent {
     this.resetForm();
   }
 
+  /** Cancels add form without saving */
   cancelAddLink(): void {
     this.resetForm();
   }
 
+  /** Resets form state and hides form */
   private resetForm(): void {
     this.addForm.reset();
     this.showAddForm.set(false);
   }
 
+  // --------- Modals & Overlays ---------
+
+  /** Opens modal to edit an existing link */
   openEditLinkModal(): void {
     if (!this.selectedLink) return;
 
@@ -248,16 +258,13 @@ export class ListComponent {
     const portal = new ComponentPortal(EditLinkModalComponent);
     const cmpRef = ref.attach(portal);
 
-    // pass link data to the modal
     cmpRef.instance.link = {
       name: this.selectedLink.name,
       url: this.selectedLink.url,
     };
 
-    // handle save / cancel events
     cmpRef.instance.saved.subscribe((data) => {
       if (data) {
-        // delegate to store
         this.store.updateLink(this.selectedLink!._id, data);
       }
       ref.dispose();
@@ -266,10 +273,10 @@ export class ListComponent {
     ref.backdropClick().subscribe(() => ref.dispose());
   }
 
+  /** Opens modal to add selected link to other collections */
   openAddToCollectionModal(): void {
     if (!this.selectedLink) return;
 
-    // 1) Erzeuge das Overlay (unverändert)
     const ref: OverlayRef = this.overlay.create({
       hasBackdrop: true,
       backdropClass: 'bg-black/60',
@@ -279,11 +286,6 @@ export class ListComponent {
         .centerHorizontally()
         .centerVertically(),
       scrollStrategy: this.overlay.scrollStrategies.block(),
-
-      /* ⚠️ statt ein String mit Leerzeichen … */
-      // panelClass: 'rounded-lg p-4 bg-surface text-white w-[400px] shadow-lg',
-
-      /* ✅ ... ein String-Array */
       panelClass: [
         'rounded-lg',
         'p-4',
@@ -293,29 +295,23 @@ export class ListComponent {
         'shadow-lg',
       ],
     });
+
     const portal = new ComponentPortal(AddToCollectionComponent);
     const cmpRef = ref.attach(portal);
 
-    // 2) Aktuelle Collection-ID aus dem Store holen
-    const currentCollection = this.store.current();
-    const currentId = currentCollection?._id;
-
-    // 3) Verfügbare Collections (ohne die aktuelle)
+    const currentId = this.store.current()?._id;
     const all = this.store.collections();
+
     const available = all
       .filter((c) => c._id !== currentId)
       .map((c) => ({ id: c._id, name: c.name }));
-
-    // 4) Bereits bestehende Links ermitteln
     const existing = all
       .filter((c) => c.links.some((l) => l._id === this.selectedLink!._id))
       .map((c) => c._id);
 
-    // 5) Inputs ins Modal setzen
     cmpRef.instance.collections = available;
     cmpRef.instance.existingIds = existing;
 
-    // 6) Auf neue Auswahl reagieren
     cmpRef.instance.selectedIdsChange.subscribe((ids) => {
       if (ids) {
         ids.forEach((cid) =>
@@ -328,6 +324,7 @@ export class ListComponent {
     ref.backdropClick().subscribe(() => ref.dispose());
   }
 
+  /** Opens confirmation modal for link removal */
   confirmRemoveLink(): void {
     if (!this.selectedLink) return;
     const current = this.store.current();
@@ -364,6 +361,7 @@ export class ListComponent {
     cmpRef.instance.cancel.subscribe(() => ref.dispose());
   }
 
+  /** Tries to extract a human-readable error message from various error formats */
   private extractErrorMessage(err: any): string {
     try {
       if (typeof err === 'string') return err;

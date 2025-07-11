@@ -1,4 +1,3 @@
-// src/app/shared/state/collection-store.service.ts
 import { Injectable, Signal, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NavigationEnd, Router } from '@angular/router';
@@ -27,11 +26,10 @@ export interface Collection {
 @Injectable({ providedIn: 'root' })
 export class CollectionStore {
   private readonly apiUrl = '/api/collections/';
-
   private routeUrl!: Signal<string>;
 
   constructor(private http: HttpClient, private router: Router) {
-    // Initialize reactive route tracking
+    // Track current route URL as a reactive Signal
     this.routeUrl = toSignal(
       this.router.events.pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -41,22 +39,26 @@ export class CollectionStore {
     );
   }
 
-  /* --------------------   STATE   -------------------- */
+  /* -------------------- STATE -------------------- */
+
+  // Private mutable state for all collections
   private readonly _collections = signal<Collection[]>([]);
-  /** Read-only view for components */
+
+  // Public read-only signal for components
   readonly collections = this._collections.asReadonly();
 
-  /** Currently selected collection based on URL */
+  // Derives the currently selected collection from the route
   readonly current = computed(() => {
     const id = this.routeUrl().match(/\/collection\/([^/]+)/)?.[1];
     return this._collections().find((c) => c._id === id) ?? null;
   });
 
+  /** Clears all stored collections from memory */
   clear(): void {
     this._collections.set([]);
   }
 
-  /** Loads all collections for the logged-in user */
+  /** Loads all user collections from the server */
   loadAll(): void {
     this.http
       .get<Collection[]>(this.apiUrl, { withCredentials: true })
@@ -64,7 +66,7 @@ export class CollectionStore {
         next: (cols) => {
           this._collections.set(cols);
 
-          // Redirect to first collection if none is selected
+          // If not inside a collection route, navigate to the first one
           if (!this.router.url.startsWith('/collection/') && cols.length) {
             this.router.navigate(['/collection', cols[0]._id]);
           }
@@ -73,6 +75,7 @@ export class CollectionStore {
       });
   }
 
+  /** Deletes a collection and redirects if necessary */
   deleteCollection(id: string): void {
     this.http
       .delete(`${this.apiUrl}${id}`, { withCredentials: true })
@@ -80,19 +83,19 @@ export class CollectionStore {
         next: () => {
           this.loadAll();
 
+          // If the current collection was deleted, redirect to another
           if (this.current()?._id === id && this.collections().length) {
             const fallback = this.collections().find((c) => c._id !== id);
-            if (fallback) {
-              this.router.navigate(['/collection', fallback._id]);
-            } else {
-              this.router.navigate(['/']);
-            }
+            this.router.navigate(
+              fallback ? ['/collection', fallback._id] : ['/']
+            );
           }
         },
         error: (err) => console.error('Error while deleting collection:', err),
       });
   }
 
+  /** Updates a collection’s name */
   updateCollectionName(id: string, name: string): void {
     this.http
       .put<Collection>(
@@ -106,11 +109,12 @@ export class CollectionStore {
       });
   }
 
-  /** Navigate to a collection programmatically */
+  /** Programmatically navigates to a specific collection */
   goTo(id: string): void {
     this.router.navigate(['/collection', id]);
   }
 
+  /** Adds a new link to the given collection */
   addLink(collectionId: string, partial: { name: string; url: string }): void {
     const url = `${this.apiUrl}${collectionId}/links/`;
 
@@ -119,6 +123,7 @@ export class CollectionStore {
       error: (err) => {
         console.error('Failed to create link', err);
 
+        // Display more user-friendly error message if available
         let message = 'Could not create link.';
         try {
           if (err.error?.error) message = err.error.error;
@@ -130,6 +135,7 @@ export class CollectionStore {
     });
   }
 
+  /** Adds an existing link to another collection */
   addExistingLinkToCollection(
     linkId: string,
     targetCollectionId: string
@@ -142,6 +148,7 @@ export class CollectionStore {
     });
   }
 
+  /** Creates a new collection and navigates to it */
   addCollection(name: string): void {
     this.http
       .post<Collection>(this.apiUrl, { name }, { withCredentials: true })
@@ -154,6 +161,7 @@ export class CollectionStore {
       });
   }
 
+  /** Removes current user from the given collection */
   leaveCollection(id: string): void {
     const url = `${this.apiUrl}${id}/leave`;
 
@@ -161,19 +169,19 @@ export class CollectionStore {
       next: () => {
         this.loadAll();
 
+        // Redirect if the left collection was currently selected
         if (this.current()?._id === id && this.collections().length) {
           const fallback = this.collections().find((c) => c._id !== id);
-          if (fallback) {
-            this.router.navigate(['/collection', fallback._id]);
-          } else {
-            this.router.navigate(['/']);
-          }
+          this.router.navigate(
+            fallback ? ['/collection', fallback._id] : ['/']
+          );
         }
       },
       error: (err) => console.error('Failed to leave collection:', err),
     });
   }
 
+  /** Updates the link metadata (name and/or URL) */
   updateLink(linkId: string, partial: { name: string; url: string }): void {
     this.http
       .put<void>(`/api/links/${linkId}`, partial, {
@@ -185,6 +193,7 @@ export class CollectionStore {
       });
   }
 
+  /** Removes a link from a specific collection */
   removeLinkFromCollection(collectionId: string, linkId: string): void {
     this.http
       .delete(`${this.apiUrl}${collectionId}/links/${linkId}`, {
@@ -197,7 +206,12 @@ export class CollectionStore {
       });
   }
 
+  /**
+   * Joins a shared collection via a public shareId.
+   * Will only proceed if the user is currently authenticated.
+   */
   joinByShareId(shareId: string): void {
+    // First verify the user is logged in
     this.http
       .get('/api/account/', {
         withCredentials: true,
@@ -212,6 +226,7 @@ export class CollectionStore {
             return of(null);
           }
 
+          // Join the collection if logged in
           return this.http.post<Collection>(
             `${this.apiUrl}join/${shareId}`,
             {},
@@ -222,7 +237,6 @@ export class CollectionStore {
       .subscribe({
         next: (collection) => {
           if (!collection) return;
-
           this.loadAll();
           this.router.navigate(['/collection', collection._id]);
         },

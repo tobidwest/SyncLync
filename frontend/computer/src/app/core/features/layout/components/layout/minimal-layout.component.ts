@@ -8,11 +8,11 @@ import { LoginComponent } from '../login/login.component';
   imports: [RouterModule, LoginComponent],
   template: `
     <div class="w-full h-full flex">
-      <!-- not logged in -->
+      <!-- Show login screen if user is not authenticated -->
       @if (!loggedIn) {
       <app-login (loggedIn)="userLoggedIn()" class="w-full" />
       }
-      <!-- logged in -->
+      <!-- Show routed content if logged in -->
       @else {
       <router-outlet></router-outlet>
       }
@@ -20,14 +20,19 @@ import { LoginComponent } from '../login/login.component';
   `,
 })
 export class MinimalLayoutComponent implements OnInit {
+  /** Tracks whether the user is logged in */
   loggedIn = false;
 
+  /** Lifecycle hook for initialization */
   ngOnInit() {
     console.log('MinimalLayoutComponent initialized');
   }
 
+  /** Called when login was successful */
   userLoggedIn() {
     this.loggedIn = true;
+
+    // Optionally load other data after login
     // this.collections.loadAll();
   }
 }

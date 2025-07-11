@@ -17,6 +17,7 @@ import { AuthService } from '../../../shared/services/auth.service';
       class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background"
     >
       <div class="sm:mx-auto sm:w-full sm:max-w-md h-full">
+        <!-- Logo & heading -->
         <img class="mx-auto h-20 w-auto" src="logo.png" alt="Your Company" />
         <h2
           class="mt-6 text-center text-xl/9 font-bold tracking-tight text-white"
@@ -29,11 +30,13 @@ import { AuthService } from '../../../shared/services/auth.service';
         <div
           class="bg-surface px-6 py-12 shadow sm:rounded-lg sm:px-12 rounded-xl"
         >
+          <!-- Auth form -->
           <form class="space-y-6" [formGroup]="form" (submit)="onSubmit()">
+            <!-- Username field -->
             <div>
-              <label for="email" class="block text-sm font-medium text-white"
-                >Username</label
-              >
+              <label for="email" class="block text-sm font-medium text-white">
+                Username
+              </label>
               <input
                 type="text"
                 id="username"
@@ -42,6 +45,7 @@ import { AuthService } from '../../../shared/services/auth.service';
               />
             </div>
 
+            <!-- Password field -->
             <div>
               <label
                 for="password"
@@ -57,6 +61,7 @@ import { AuthService } from '../../../shared/services/auth.service';
               />
             </div>
 
+            <!-- Submit button & mode switch -->
             <div>
               <button
                 type="submit"
@@ -64,6 +69,8 @@ import { AuthService } from '../../../shared/services/auth.service';
               >
                 {{ registerMode ? 'Register' : 'Login' }}
               </button>
+
+              <!-- Toggle between login and registration -->
               <p
                 class="text-center text-white text-xs pt-2 cursor-pointer hover:underline"
                 (click)="toggleMode()"
@@ -82,23 +89,35 @@ import { AuthService } from '../../../shared/services/auth.service';
   `,
 })
 export class LoginComponent {
+  /** Full-height styling for flex container */
   @HostBinding('class') class = 'h-full';
+
+  /** Emits an event when login is successful */
   @Output() loggedIn = new EventEmitter<void>();
 
+  /** Reactive form group for login/registration */
   form: FormGroup;
+
+  /** Toggles between login and registration mode */
   registerMode = false;
 
   constructor(private fb: FormBuilder, private authService: AuthService) {
+    // Initialize form with required username and password fields
     this.form = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
     });
   }
 
+  /** Switch between login and register modes */
   toggleMode(): void {
     this.registerMode = !this.registerMode;
   }
 
+  /**
+   * Handles login flow
+   * Emits `loggedIn` event on success
+   */
   private login(username: string, password: string): void {
     this.authService.login(username, password).subscribe({
       next: () => {
@@ -112,16 +131,21 @@ export class LoginComponent {
     });
   }
 
+  /**
+   * Handles submit of login or registration form
+   * Registers and then logs in if in register mode
+   */
   async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
 
     const { username, password } = this.form.value;
 
     if (this.registerMode) {
+      // Registration mode: register and then auto-login
       this.authService.register(username, password).subscribe({
         next: () => {
           console.log('Registration successful');
-          this.login(username, password); // auto-login after successful registration
+          this.login(username, password);
         },
         error: (err) => {
           console.error('Registration failed:', err);
@@ -129,6 +153,7 @@ export class LoginComponent {
         },
       });
     } else {
+      // Standard login
       this.login(username, password);
     }
   }

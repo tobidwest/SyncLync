@@ -46,26 +46,28 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
   ],
   template: `
     <div class="flex flex-col w-full h-full bg-[#0E1923]">
-      <!-- Logo -->
+      <!-- App Logo -->
       <div class="flex shrink-0 items-center pt-4">
         <img class="w-auto m-auto h-[50px]" src="logo.png" alt="Your Company" />
       </div>
 
-      <!-- Scrollable content area -->
+      <!-- Main navigation area (scrollable if needed) -->
       <div class="flex-1 overflow-y-auto px-6 mt-4">
         <nav class="flex flex-col">
-          <ul role="list" class="flex flex-col gap-y-7">
+          <ul class="flex flex-col gap-y-7">
             <li>
-              <ul role="list" class="-mx-2 space-y-2">
-                <!-- Add Collection -->
+              <ul class="-mx-2 space-y-2">
+                <!-- Button to add a new collection -->
                 <ng-container *ngIf="!showAddInput; else addForm">
                   <a
-                    class="text-white group flex gap-3 rounded-md p-2 text-xl font-semibold cursor-pointer border-2 border-primary/80 bg-primary/80"
+                    class="text-white flex gap-3 rounded-md p-2 text-xl font-semibold cursor-pointer border-2 border-primary/80 bg-primary/80"
                     (click)="showAddInput = true"
                   >
                     + Add Collection
                   </a>
                 </ng-container>
+
+                <!-- Inline input for new collection -->
                 <ng-template #addForm>
                   <div
                     class="flex items-center p-2 text-xl font-semibold text-white border-2 border-primary/80 rounded-md"
@@ -79,13 +81,13 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                       (keydown.enter)="addCollection()"
                       (keydown.escape)="cancelAddCollection()"
                     />
+                    <!-- Confirm add -->
                     <svg
                       class="w-6 h-6 cursor-pointer text-green-400"
                       (click)="addCollection()"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
                       fill="currentColor"
-                      aria-hidden="true"
                     >
                       <path
                         fill-rule="evenodd"
@@ -93,13 +95,13 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                         clip-rule="evenodd"
                       />
                     </svg>
+                    <!-- Cancel -->
                     <svg
                       class="w-8 h-8 cursor-pointer text-red-400 pl-2"
                       (click)="cancelAddCollection()"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
                       fill="currentColor"
-                      aria-hidden="true"
                     >
                       <path
                         fill-rule="evenodd"
@@ -110,17 +112,16 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                   </div>
                 </ng-template>
 
-                <!-- Collection links with context menu -->
+                <!-- Collection links -->
                 <ng-container *ngFor="let col of store.collections()">
                   <div
-                    class="text-white hover:bg-surface hover:border-l-4 hover:border-primary
-               group flex justify-between gap-x-3 rounded-md p-2 text-xl font-semibold
-               cursor-pointer"
+                    class="text-white hover:bg-surface hover:border-l-4 hover:border-primary flex justify-between gap-x-3 rounded-md p-2 text-xl font-semibold cursor-pointer"
                     [routerLink]="['/collection', col._id]"
                     routerLinkActive="bg-surface border-l-4 border-primary"
                     (click)="closeSidebar.emit()"
                   >
                     {{ col.name }}
+                    <!-- Context menu trigger (visible if current) -->
                     <svg
                       *ngIf="isActive(col._id)"
                       [cdkMenuTriggerFor]="collectionMenu"
@@ -129,7 +130,6 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 16 24"
                       fill="currentColor"
-                      aria-hidden="true"
                       (click)="$event.stopPropagation()"
                     >
                       <circle cx="8" cy="4" r="2" />
@@ -138,34 +138,31 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                     </svg>
                   </div>
 
+                  <!-- Collection context menu -->
                   <ng-template #collectionMenu cdkMenuPanel>
                     <div
                       cdkMenu
-                      class="z-10 w-48 origin-top-right rounded-md bg-surface text-on-background py-1 shadow-lg focus:outline-none text-white ring-1"
+                      class="z-10 w-48 origin-top-right rounded-md bg-surface text-on-background py-1 shadow-lg text-white ring-1"
                       role="menu"
-                      aria-orientation="vertical"
                     >
                       @if(col.isOwner) {
                       <a
                         cdkMenuItem
-                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer focus:outline-none"
-                        role="menuitem"
+                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer"
                         (click)="openShareModal(col)"
                       >
                         Share Collection
                       </a>
                       <a
                         cdkMenuItem
-                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer focus:outline-none"
-                        role="menuitem"
+                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer"
                         (click)="openEditModal(col)"
                       >
                         Rename Collection
                       </a>
                       <a
                         cdkMenuItem
-                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer focus:outline-none"
-                        role="menuitem"
+                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer"
                         (click)="confirmDelete(col)"
                       >
                         Delete Collection
@@ -173,8 +170,7 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
                       } @else {
                       <a
                         cdkMenuItem
-                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer focus:outline-none"
-                        role="menuitem"
+                        class="block px-4 py-2 text-sm hover:bg-background cursor-pointer"
                         (click)="confirmLeave(col)"
                       >
                         Leave Collection
@@ -189,9 +185,9 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
         </nav>
       </div>
 
+      <!-- Sorting dropdown -->
       <div class="p-4 text-white">
         <label class="block mb-1 text-sm font-medium">Sorting</label>
-
         <ng-select
           class="ng-background"
           [formControl]="sortingControl"
@@ -199,17 +195,9 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
           [searchable]="true"
           [clearable]="false"
         ></ng-select>
-        <!-- <select
-          class="w-full p-2 rounded bg-surface border border-gray-600 text-white"
-          [formControl]="sortingControl"
-        >
-          <option *ngFor="let option of sortingOptions" [value]="option">
-            {{ option }}
-          </option>
-        </select> -->
       </div>
 
-      <!-- Profile area -->
+      <!-- User info & settings menu -->
       <div
         class="flex items-center gap-3 p-4 border-t border-surface text-white"
         [cdkMenuTriggerFor]="Usermenu"
@@ -218,34 +206,30 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
         <span class="text-base font-medium">{{ username }}</span>
       </div>
 
-      <!-- User menu -->
+      <!-- User menu overlay -->
       <ng-template #Usermenu cdkMenuPanel>
         <div
           cdkMenu
-          class="z-10 w-48 origin-top-right rounded-md bg-surface text-on-background py-1 shadow-lg focus:outline-none text-white ring-1"
+          class="z-10 w-48 origin-top-right rounded-md bg-surface text-on-background py-1 shadow-lg text-white ring-1"
           role="menu"
-          aria-orientation="vertical"
         >
           <a
             cdkMenuItem
-            class="block px-4 py-2 text-sm hover:bg-background cursor-pointer focus:outline-none"
-            role="menuitem"
+            class="block px-4 py-2 text-sm hover:bg-background cursor-pointer"
             (click)="openChangeEmailModal()"
           >
             Change Email
           </a>
           <a
             cdkMenuItem
-            class="block px-4 py-2 text-sm hover:bg-background cursor-pointer focus:outline-none"
-            role="menuitem"
+            class="block px-4 py-2 text-sm hover:bg-background cursor-pointer"
             (click)="openChangePasswordModal()"
           >
             Change Password
           </a>
           <a
             cdkMenuItem
-            class="block px-4 py-2 text-sm hover:bg-background text-red-400 cursor-pointer focus:outline-none"
-            role="menuitem"
+            class="block px-4 py-2 text-sm hover:bg-background text-red-400 cursor-pointer"
             (click)="onLogout()"
           >
             Logout
@@ -256,40 +240,63 @@ import { ChangePasswordModalComponent } from '../../../shared/modals/change-pass
   `,
 })
 export class SideNavigationComponent {
+  /** Emits when sidebar should be closed (e.g. after click in mobile view) */
   @Output() closeSidebar = new EventEmitter<void>();
-  private readonly router = inject(Router);
-  private readonly overlay = inject(Overlay);
-  readonly store = inject(CollectionStore);
 
+  /** Input reference to automatically focus when showing new collection input */
+  @ViewChild('inputRef') inputRef?: ElementRef<HTMLInputElement>;
+
+  /** Controls whether the add-collection input is shown */
+  showAddInput = false;
+
+  /** Holds the input value for a new collection name */
+  newCollectionName = '';
+
+  /** Stores the username to be displayed in the user menu */
+  username = '';
+
+  /** FormControl for sorting dropdown */
   sortingControl = new FormControl<SortingOption>('created', {
     nonNullable: true,
   });
 
+  /** Available sorting options */
   readonly sortingOptions: SortingOption[] = [
     'created',
     'alphabetically',
     'counter',
   ];
 
+  /** Angular Router for navigation and active state checking */
+  private readonly router = inject(Router);
+
+  /** CDK Overlay service to open modals */
+  private readonly overlay = inject(Overlay);
+
+  /** Collection store managing all collection-related state and operations */
+  readonly store = inject(CollectionStore);
+
   constructor(
     private storeAuth: AuthService,
     private accountService: AccountService,
-    @Host() private parent: LayoutComponent // inject Layout instance
+    @Host() private parent: LayoutComponent // Access to parent layout for logout callback
   ) {
+    // Load sorting preference and username once at init
     this.accountService.getSortingPreference().subscribe({
       next: (res) => {
         this.sortingControl.setValue(res.sorting);
-        this.username = res.username; // 👈 assign here
+        this.username = res.username;
       },
       error: (err) =>
         console.error('Error while retrieving sorting preference', err),
     });
 
-    // Immediately persist on change
+    // Persist sorting changes immediately when user changes selection
     this.sortingControl.valueChanges.subscribe((value) => {
       this.accountService.updateSortingPreference(value).subscribe({
         next: () => {
-          console.log('Sorting updated:', value), this.closeSidebar.emit();
+          console.log('Sorting updated:', value);
+          this.closeSidebar.emit(); // optional: close sidebar on change
         },
         error: (err) =>
           console.error('Error while setting sorting preference', err),
@@ -297,29 +304,14 @@ export class SideNavigationComponent {
     });
   }
 
-  @ViewChild('inputRef') inputRef?: ElementRef<HTMLInputElement>;
-
-  showAddInput = false;
-  newCollectionName = '';
-  username = '';
-  activeCollection: CollectionLink | null = null;
-
-  onLogout() {
-    this.storeAuth.logout().subscribe({
-      next: () => {
-        this.parent.userLoggedOut(); // parent callback
-        this.router.navigate(['/']);
-      },
-      error: (err) => console.error('Logout failed', err),
-    });
-  }
-
+  /** Automatically focus input when input field becomes visible */
   ngAfterViewChecked(): void {
     if (this.showAddInput && this.inputRef) {
       this.inputRef.nativeElement.focus();
     }
   }
 
+  /** Checks if a collection is the currently active route */
   isActive(id: string): boolean {
     return this.router.isActive(`/collection/${id}`, {
       paths: 'subset',
@@ -329,31 +321,46 @@ export class SideNavigationComponent {
     });
   }
 
+  /** Creates a new collection and resets the input */
   addCollection(): void {
     const name = this.newCollectionName.trim();
     if (!name) return;
 
-    this.store.addCollection(name); // 🚀 delegate to store
+    this.store.addCollection(name);
     this.resetAddForm();
     this.closeSidebar.emit();
   }
 
+  /** Cancels the "add collection" flow */
+  cancelAddCollection(): void {
+    this.resetAddForm();
+  }
+
+  /** Resets internal state after collection add/cancel */
   private resetAddForm(): void {
     this.newCollectionName = '';
     this.showAddInput = false;
   }
 
-  cancelAddCollection(): void {
-    this.newCollectionName = '';
-    this.showAddInput = false;
+  /** Triggers logout and delegates auth reset to parent layout */
+  onLogout() {
+    this.storeAuth.logout().subscribe({
+      next: () => {
+        this.parent.userLoggedOut(); // notify layout
+        this.router.navigate(['/']);
+      },
+      error: (err) => console.error('Logout failed', err),
+    });
   }
 
+  /** Opens modal to share a collection (owners only) */
   openShareModal(col: Collection) {
     const ref = this.openModal(ShareCollectionModalComponent);
     ref.instance.collection = { _id: col._id, shareId: col.shareId };
     this.closeSidebar.emit();
   }
 
+  /** Opens modal to rename a collection */
   openEditModal(col: Collection) {
     const ref = this.openModal(EditCollectionModalComponent);
     ref.instance.collection = { id: col._id, name: col.name };
@@ -365,6 +372,7 @@ export class SideNavigationComponent {
     });
   }
 
+  /** Opens a confirmation dialog to delete a collection */
   confirmDelete(col: Collection) {
     const ref = this.openModal(ConfirmModalComponent);
     ref.instance.title = 'Delete Collection?';
@@ -379,11 +387,13 @@ export class SideNavigationComponent {
     });
   }
 
+  /** Opens a confirmation dialog to leave a shared collection */
   confirmLeave(col: Collection) {
     const ref = this.openModal(ConfirmModalComponent);
     ref.instance.title = 'Leave Collection?';
     ref.instance.description = `Do you really want to leave “${col.name}”?`;
-    ref.instance.confirmed.subscribe((ok: boolean) => {
+
+    ref.instance.confirmed.subscribe(() => {
       this.store.leaveCollection(col._id);
       this.store.loadAll();
       ref.destroy();
@@ -391,16 +401,22 @@ export class SideNavigationComponent {
     });
   }
 
+  /** Opens modal to update user email */
   openChangeEmailModal() {
     const ref = this.openModal(ChangeEmailModalComponent);
     ref.instance.updated.subscribe(() => ref.destroy());
   }
 
+  /** Opens modal to update user password */
   openChangePasswordModal() {
     const ref = this.openModal(ChangePasswordModalComponent);
     ref.instance.updated.subscribe(() => ref.destroy());
   }
 
+  /**
+   * Utility method to open any component as a centered modal overlay.
+   * Automatically closes on backdrop click.
+   */
   openModal<T>(
     component: ComponentType<T>,
     config?: OverlayConfig
@@ -433,6 +449,7 @@ export class SideNavigationComponent {
   }
 }
 
+/** Lightweight interface for collection context menu entries */
 interface CollectionLink {
   name: string;
   id: string;
