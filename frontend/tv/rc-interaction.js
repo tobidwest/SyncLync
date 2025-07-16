@@ -1,16 +1,17 @@
 // scene implementation
 
 var scene = {
-  theAppObject: null,
-  appAreaDiv: null,
-  isAppAreaVisible: false,
-  redButtonDiv: null,
+  theAppObject: null, // will hold the HbbTV application object
+  appAreaDiv: null, // reference to the main app UI container
+  isAppAreaVisible: false, // tracks if the app scene is currently visible
+  redButtonDiv: null, // reference to red button notification prompt
   lastNavigationButtonPressed: null,
   lastPlaybackButtonPressed: null,
   lastNumericButtonPressed: null,
-  shouldReactToPlaybackButtons: false,
-  shouldReactToNumericButtons: false,
+  shouldReactToPlaybackButtons: false, // whether to enable playback button input
+  shouldReactToNumericButtons: false, // whether to enable numeric button input
   timeout: 0,
+  // initializes the scene at app startup
   initialize: function (appObj) {
     this.theAppObject = appObj;
     this.appAreaDiv = document.getElementById("app_area");
@@ -44,15 +45,15 @@ var scene = {
     return mask;
   },
   showAppArea: function () {
-    this.appAreaDiv.style.visibility = "visible";
-    this.redButtonDiv.style.visibility = "hidden";
+    this.appAreaDiv.style.visibility = "visible"; // make app visible
+    this.redButtonDiv.style.visibility = "hidden"; // hide red button prompt
     this.isAppAreaVisible = true;
     // when shown, app reacts to all buttons relevant on the scene
     rcUtils.setKeyset(this.theAppObject, this.getRelevantButtonsMask());
   },
   hideAppArea: function () {
-    this.appAreaDiv.style.visibility = "hidden";
-    this.redButtonDiv.style.visibility = "visible";
+    this.appAreaDiv.style.visibility = "hidden"; // hide app
+    this.redButtonDiv.style.visibility = "visible"; // show red button prompt
     this.isAppAreaVisible = false;
     // when hidden, app reacts only to red button key press (show app scene)
     rcUtils.setKeyset(this.theAppObject, rcUtils.MASK_CONSTANT_RED);
@@ -64,7 +65,7 @@ function handleKeyCode(kc) {
   try {
     switch (kc) {
       case VK_RED:
-        // red button shows & hides the app scene
+        // red button shows and hides the app scene
         if (scene.isAppAreaVisible) {
           scene.hideAppArea();
 
@@ -73,7 +74,7 @@ function handleKeyCode(kc) {
           scene.showAppArea();
 
           setTimeout(function () {
-            stateUtitls.displayCorrectState();
+            stateUtitls.displayCorrectState(); // decide what to show (login or links)
           }, 500); // wait for 500ms to ensure that UI change is completed
         }
         break;
@@ -94,7 +95,7 @@ function handleKeyCode(kc) {
                 logoutXhr.onreadystatechange = function () {
                   if (logoutXhr.readyState === 4) {
                     if (logoutXhr.status === 200) {
-                      // change to login-screen
+                      // after logout change to login-screen
                       document
                         .getElementById("state-linklist")
                         .classList.add("state-hidden");
@@ -111,7 +112,7 @@ function handleKeyCode(kc) {
                 };
                 logoutXhr.send();
               } else {
-                //do nothing
+                //do nothing if not logged in
                 console.log("user is not logged in, cannot logout");
               }
             }
@@ -120,17 +121,17 @@ function handleKeyCode(kc) {
         }
         break;
 
-      case VK_LEFT:
-        if (linkUtils.currentFocusedCell) {
+      case VK_LEFT: // navigate left
+        if (linkUtils.currentFocusedCell) {// if current focus is on a link cell   
           const currentCell = linkUtils.currentFocusedCell;
           const currentRow = currentCell.parentElement;
           const cellsInRow = Array.from(
             currentRow.querySelectorAll(".grid-item")
           );
           const cellIndex = cellsInRow.indexOf(currentCell);
-
-          if (cellIndex === 0) {
-            // Fokus von Tabelle zu Navi springen (auf aktuell aktive Nav)
+          
+          if (cellIndex === 0) { // if current focused link is the leftmost in the table row
+            // set focus from link table to current collection
             const navLinks = document.querySelectorAll("#nav-links .nav-link");
             const navLinkToFocus =
               navLinks[linkUtils.activeNavIndex] || navLinks[0];
@@ -138,16 +139,16 @@ function handleKeyCode(kc) {
               linkUtils.focusNavLink(navLinkToFocus);
             }
           } else {
-            // Eine Zelle nach links in Tabelle
+            // move one cell to the left in the table
             const targetCell = cellsInRow[cellIndex - 1];
             linkUtils.focusCell(targetCell);
           }
         }
         break;
 
-      case VK_RIGHT:
-        if (linkUtils.currentFocusedNavLink) {
-          // Fokus von Navi zurück in Tabelle: Erste Zelle der aktuell aktiven Links-Tabelle-Zeile fokussieren
+      case VK_RIGHT: //navigate right
+        if (linkUtils.currentFocusedNavLink) { // if current focus is on a collection
+          // move focus from colelction to first element in the link table (link cell in upper-left corner)
           const linksTable = document.getElementById("links-table");
           const rows = linksTable.querySelectorAll("tr");
           if (rows.length > 0) {
@@ -156,7 +157,7 @@ function handleKeyCode(kc) {
               linkUtils.focusCell(firstCell);
             }
           }
-        } else if (linkUtils.currentFocusedCell) {
+        } else if (linkUtils.currentFocusedCell) { // if current focus is on a link cell
           const currentCell = linkUtils.currentFocusedCell;
           const currentRow = currentCell.parentElement;
           const cellsInRow = Array.from(
@@ -165,30 +166,30 @@ function handleKeyCode(kc) {
           const cellIndex = cellsInRow.indexOf(currentCell);
 
           let targetCell;
-          if (cellIndex === cellsInRow.length - 1) {
-            targetCell = cellsInRow[0];
+          if (cellIndex === cellsInRow.length - 1) { // if current focused link is the rightmost in the table row
+            targetCell = cellsInRow[0]; // wrap-around to the first link cell in this row
           } else {
-            targetCell = cellsInRow[cellIndex + 1];
+            targetCell = cellsInRow[cellIndex + 1]; // move one cell to the right
           }
 
-          // Prüfen, ob targetCell einen Link (data-link-url) enthält
+          // check if the cell navigated to contains a link
           if (targetCell.hasAttribute("data-link-url")) {
-            linkUtils.focusCell(targetCell);
+            linkUtils.focusCell(targetCell); // set focus to this link cell
           }
-          // sonst nichts tun, Fokus bleibt auf currentCell
+          // do not move focus is next cell would be an empty cell
         }
         break;
 
-      case VK_DOWN:
-        if (linkUtils.currentFocusedNavLink) {
-          // Fokus in Navi: eine Collection nach unten (wrap-around bleibt)
+      case VK_DOWN: // navigate down
+        if (linkUtils.currentFocusedNavLink) { // if current focus is on a collection
+          
           const navLinks = Array.from(
             document.querySelectorAll("#nav-links .nav-link")
           );
           let idx = navLinks.indexOf(linkUtils.currentFocusedNavLink);
-          idx = (idx + 1) % navLinks.length;
+          idx = (idx + 1) % navLinks.length; // move focus down in the collection list or to the very top if the current selected collection is at the bottom (wrap-around)
           linkUtils.focusNavLink(navLinks[idx]);
-        } else if (linkUtils.currentFocusedCell) {
+        } else if (linkUtils.currentFocusedCell) { // if current focus is on a link cell
           const currentCell = linkUtils.currentFocusedCell;
           const table = currentCell.closest("table");
           const currentRow = currentCell.parentElement;
@@ -200,7 +201,7 @@ function handleKeyCode(kc) {
 
           let rowIndex = rows.indexOf(currentRow);
 
-          // KEIN wrap-around nach oben, also nur vorwärts, wenn nicht letzte Zeile
+          // move one cell down (no wrap-around)
           if (rowIndex < rows.length - 1) {
             rowIndex = rowIndex + 1;
 
@@ -211,25 +212,24 @@ function handleKeyCode(kc) {
 
             const targetCell =
               targetCells[colIndex] || targetCells[targetCells.length - 1];
-
+            // check if the cell navigated to contains a link
             if (targetCell.hasAttribute("data-link-url")) {
-              linkUtils.focusCell(targetCell);
+              linkUtils.focusCell(targetCell);  // set focus to this link cell
             }
           }
-          // sonst Fokus bleibt auf currentCell (keine Aktion)
+          // do not move focus is next cell would be an empty cell
         }
         break;
 
       case VK_UP:
-        if (linkUtils.currentFocusedNavLink) {
-          // Fokus in Navi: eine Collection nach oben (wrap-around bleibt)
+        if (linkUtils.currentFocusedNavLink) { // if current focus is on a collection
           const navLinks = Array.from(
             document.querySelectorAll("#nav-links .nav-link")
           );
           let idx = navLinks.indexOf(linkUtils.currentFocusedNavLink);
-          idx = (idx - 1 + navLinks.length) % navLinks.length;
+          idx = (idx - 1 + navLinks.length) % navLinks.length; // move focus up in the collection list or to the very bottom if the current selected collection is at the top (wrap-around)
           linkUtils.focusNavLink(navLinks[idx]);
-        } else if (linkUtils.currentFocusedCell) {
+        } else if (linkUtils.currentFocusedCell) { // if current focus is on a link cell
           const currentCell = linkUtils.currentFocusedCell;
           const table = currentCell.closest("table");
           const currentRow = currentCell.parentElement;
@@ -241,7 +241,7 @@ function handleKeyCode(kc) {
 
           let rowIndex = rows.indexOf(currentRow);
 
-          // KEIN wrap-around nach unten, also nur rückwärts, wenn nicht erste Zeile
+          // move one cell up (no wrap-around)
           if (rowIndex > 0) {
             rowIndex = rowIndex - 1;
 
@@ -252,35 +252,34 @@ function handleKeyCode(kc) {
 
             const targetCell =
               targetCells[colIndex] || targetCells[targetCells.length - 1];
-
-            if (targetCell.hasAttribute("data-link-url")) {
-              linkUtils.focusCell(targetCell);
+            // check if the cell navigated to contains a link
+            if (targetCell.hasAttribute("data-link-url")) { 
+              linkUtils.focusCell(targetCell); // set focus to this link cell
             }
           }
-          // otherwise focus remains on currentCell
+          // do not move focus is next cell would be an empty cell
         }
         break;
 
       case VK_ENTER:
-        if (linkUtils.currentFocusedNavLink) {
-          // activate the collection
+        if (linkUtils.currentFocusedNavLink) { // if current focus is on a collection
+          // opens the collection
           const idx = parseInt(linkUtils.currentFocusedNavLink.dataset.idx, 10);
           if (!isNaN(idx)) {
-            linkUtils.setActiveNav(idx);
-            linkUtils.renderLinksTable(linkUtils.collections[idx].links || []);
-            // focus remains on the collection
-            linkUtils.focusNavLink(linkUtils.currentFocusedNavLink);
+            linkUtils.setActiveNav(idx); // highlight nav-item 
+            linkUtils.renderLinksTable(linkUtils.collections[idx].links || []); // load links
+            linkUtils.focusNavLink(linkUtils.currentFocusedNavLink); // focus remains on the collection
           }
-        } else if (linkUtils.currentFocusedCell) {
-          // activate a link table cell
-          linkUtils.activateLink(linkUtils.currentFocusedCell);
+        } else if (linkUtils.currentFocusedCell) { // if current focus is on a link cell
+          
+          linkUtils.activateLink(linkUtils.currentFocusedCell); // opens the link
         }
         break;
     }
   } catch (e) {
     // pressed unhandled key, catch the error
   }
-  // we return true to prevent default action for processed keys
+  // return true to prevent default action for processed keys
   return true;
 }
 
@@ -294,7 +293,7 @@ function start() {
     if (appObject === null) {
       // error acquiring the application objecto
     } else {
-      // we have the Application object, and we can initialize the scene and show our app
+      // initialize the scene and show our app
       scene.initialize(appObject);
       appObject.show();
     }
@@ -310,6 +309,6 @@ function start() {
     red_button_notification_field.style.visibility = "visible";
     setTimeout(() => {
       red_button_notification_field.style.visibility = "hidden";
-    }, 5000);
+    }, 5000); // hide after 5 seconds to not disturb the viewer from watching TV 
   }, 1000);
 }
