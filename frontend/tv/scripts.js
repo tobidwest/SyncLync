@@ -114,12 +114,12 @@ var loginUtils = {
   },
 };
 
-// helper functions for displaying links and collections
+// helper functions for displaying links and collections and for managing the focus used for navigation
 var linkUtils = {
-  collections: [],
+  collections: [], // collections loaded from server
   activeNavIndex: 0, // currently selected collection
-  currentFocusedCell: null, // focus on link table
-  currentFocusedNavLink: null, // focus on collections
+  currentFocusedCell: null, // currently focused link cell
+  currentFocusedNavLink: null, // currently focused collections
 
   // fetch collections from API on page load
   fetchCollectionsAndRender: function () {
@@ -133,22 +133,24 @@ var linkUtils = {
             linkUtils.renderNavLinks();
             if (linkUtils.collections.length > 0) {
               linkUtils.renderLinksTable(linkUtils.collections[0].links || []);
-              linkUtils.setActiveNav(0);
+              linkUtils.setActiveNav(0); // select first collection
             } else {
+              // no collections available
               document.getElementById("links-table").innerHTML =
                 "<tr><td>No collections found.</td></tr>";
             }
           } catch (e) {
-            stateUtitls.displayCorrectState();
+            stateUtitls.displayCorrectState(); // retry state check
           }
         } else {
-          stateUtitls.displayCorrectState();
+          stateUtitls.displayCorrectState(); // retry state check
         }
       }
     };
     xhr.send();
   },
 
+  // render nav-link for each collection
   renderNavLinks: function () {
     const navLinksDiv = document.getElementById("nav-links");
     navLinksDiv.innerHTML = "";
@@ -158,18 +160,18 @@ var linkUtils = {
       a.className = "nav-link";
       a.textContent = col.name;
       a.dataset.idx = idx;
-      a.tabIndex = 0; //
+      a.tabIndex = 0;
       a.onmouseenter = function (e) {
         e.preventDefault();
-        linkUtils.renderLinksTable(col.links);
-        linkUtils.setActiveNav(idx);
-        linkUtils.focusNavLink(a); // Fokus auch auf Navi-Element setzen
+        linkUtils.renderLinksTable(col.links); // render links for current collection
+        linkUtils.setActiveNav(idx); // set styling for active collection
+        linkUtils.focusNavLink(a); // set focus to current collection
       };
       navLinksDiv.appendChild(a);
     });
   },
 
-  // highlight the active nav-link
+  // highlight the active collection
   setActiveNav: function (activeIdx) {
     linkUtils.activeNavIndex = activeIdx;
     const navLinks = document.querySelectorAll("#nav-links .nav-link");
@@ -184,7 +186,7 @@ var linkUtils = {
   renderLinksTable: function (links) {
     const table = document.getElementById("links-table");
     table.innerHTML = "";
-    const perRow = 3;
+    const perRow = 3; // number of links per row
 
     for (let i = 0; i < links.length; i += perRow) {
       const tr = document.createElement("tr");
@@ -193,19 +195,20 @@ var linkUtils = {
         td.className = "grid-item";
         const link = links[i + j];
         if (link) {
-          td.tabIndex = 0; //
+          td.tabIndex = 0; 
           td.style.cursor = "pointer";
           td.dataset.linkUrl = link.url;
           td.dataset.linkId = link._id || "";
 
           td.onclick = function () {
-            linkUtils.activateLink(td);
+            linkUtils.activateLink(td); // open link when clicked
           };
           td.innerHTML = `
                 <img src="${link.icon}" alt="${link.name}" />
                 <span>${link.name}</span>
               `;
         } else {
+          // if no link is present empty cell for grid layout consistency
           td.innerHTML = "";
           td.style.background = "transparent";
           td.style.border = "none";
@@ -222,13 +225,14 @@ var linkUtils = {
     spacerDiv.style.flexShrink = "0";
     table.appendChild(spacerDiv);
 
-    // put focus on first cell
+    // automatically put focus on first link cell
     const firstCell = table.querySelector(".grid-item[tabindex='0']");
     if (firstCell) {
       linkUtils.focusCell(firstCell);
     }
   },
 
+  // set focus to a collection and remove focus from previously focused element
   focusNavLink: function (navLink) {
     if (linkUtils.currentFocusedNavLink) {
       linkUtils.currentFocusedNavLink.classList.remove("focused-nav");
@@ -237,13 +241,14 @@ var linkUtils = {
     navLink.classList.add("focused-nav");
     linkUtils.currentFocusedNavLink = navLink;
 
-    // undo focus of link table
+    // remove focus from link table
     if (linkUtils.currentFocusedCell) {
       linkUtils.currentFocusedCell.classList.remove("focused");
       linkUtils.currentFocusedCell = null;
     }
   },
 
+  // set focus to a link cell and remove focus from previously focused element
   focusCell: function (cell) {
     if (linkUtils.currentFocusedCell) {
       linkUtils.currentFocusedCell.classList.remove("focused");
@@ -252,29 +257,30 @@ var linkUtils = {
     cell.classList.add("focused");
     linkUtils.currentFocusedCell = cell;
 
-    // undo focus of collections
+    // remove focus from collections
     if (linkUtils.currentFocusedNavLink) {
       linkUtils.currentFocusedNavLink.classList.remove("focused-nav");
       linkUtils.currentFocusedNavLink = null;
     }
   },
 
+  // handles link click
   activateLink: function (el) {
     const linkId = el.dataset.linkId;
     const linkUrl = el.dataset.linkUrl;
 
     if (linkId) {
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", `/api/links/${linkId}/click`, true);
+      xhr.open("POST", `/api/links/${linkId}/click`, true); //reports a link click to the server to increase usage counter
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-          window.open(linkUrl);
+          window.open(linkUrl); //opens the link
         }
       };
       xhr.send(JSON.stringify({}));
-    } else if (linkUrl) {
-      window.open(linkUrl);
+    } else if (linkUrl) { //fallback if reporting to server is not possible
+      window.open(linkUrl); //opens the link
     }
   },
 };
